@@ -1,7 +1,8 @@
 Brahima Quentin
 
-Je sais pas trop quoi faire ?
+Jeu de platforme 2d ("Bevy" "amethyst")
+- obstacle, enemis, powerup, handicap, etc (encore en cours)
 
-Jeu de platforme 2d "Bevy" "amethyst"?
+ou/et
 
 HYPE: Machine learning? "On y connait rien" 
