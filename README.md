@@ -1,10 +1,8 @@
 
 # Brahima Quentin
 
-Jeu de platforme 2d ("Bevy" "amethyst")
+Jeu 2d ("amethyst")
 
-- obstacle, enemis, powerup, handicap, etc (encore en cours)
+- Module combat simpliste
 
-ou/et
-
-HYPE: Machine learning? "On y connait rien"
+Ameliorations si temps disponible
