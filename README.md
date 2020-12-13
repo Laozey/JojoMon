@@ -1,5 +1,5 @@
 # En quoi consiste ce projet ?
-Jojomon est un jeu **Pokemonlike** orienté uniquement sur la **phase de combat** autour du thème de **Jojo's Bizarre Adventure** !
+Jojomon est un jeu basé uniquement sur la **phase de combat** de **Pokemon** avec une touche de **Jojo's Bizarre Adventure** !
 
 ### To do :
 - [ ]  Mécanique de combat
