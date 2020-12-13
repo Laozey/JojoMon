@@ -5,7 +5,7 @@ pub enum Effets {
     LostAttack(u32, u32),
     LostSpeed(u32, u32),
     Lostprecision(u32, u32),
-    LostEscape(u32, u32),
+    Lostdodge(u32, u32),
 }
 
 //? A voir si on l'ajoute
@@ -45,18 +45,18 @@ pub struct StandStats {
     speed: u32,
     attack: u32,
     accuracy: u32,
-    escape: u32,
+    dodge: u32,
     status: Vec<Effets>,
 }
 
 impl StandStats {
-    fn new(hp: i32, speed: u32, attack: u32, accuracy: u32, escape: u32) -> Self {
+    fn new(hp: i32, speed: u32, attack: u32, accuracy: u32, dodge: u32) -> Self {
         StandStats {
             hp: hp,
             speed: speed,
             attack: attack,
             accuracy: accuracy,
-            escape: escape,
+            dodge: dodge,
             status: Vec::new(),
         }
     }
@@ -75,7 +75,7 @@ impl Default for StandStats {
             speed: 5,
             attack: 10,
             accuracy: 90,
-            escape: 10,
+            dodge: 10,
             status: vec![],
         };
     }
