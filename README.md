@@ -1,10 +1,26 @@
+# En quoi consiste ce projet ?
+Jojomon est un jeu basé uniquement sur la **phase de combat** de **Pokemon** avec une touche de **Jojo's Bizarre Adventure** !
 
-# Brahima Quentin
+### To do :
+- [ ]  Mécanique de combat
+- [ ]  IU fonctionnelle
 
-Jeu de platforme 2d ("Bevy" "amethyst")
+### Idée de fonctionnalités :
+* Plus de personnages
+* Tooltip sur les attaques
+* UI plus avancée
+* Mecanique de combat plus avancée (Système d'équipe style *Naruto Storm 4*)
+* Dialogue entre les personnages
+* Son
+* Menu 
+* Animation
+* Multijoueur / IA
 
-- obstacle, enemis, powerup, handicap, etc (encore en cours)
+### Outils utilisés :
+- Crates:
+    - [GGEZ](https://github.com/ggez/ggez#what-is-this)
+    - [Amethyst/Legion](https://github.com/amethyst/legion)
 
-ou/et
-
-HYPE: Machine learning? "On y connait rien"
+### Références :
+- [Pokemon](https://fr.wikipedia.org/wiki/Pok%C3%A9mon)
+- [Jojo's Bizarre Adventure](https://fr.wikipedia.org/wiki/JoJo%27s_Bizarre_Adventure)
