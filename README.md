@@ -20,3 +20,7 @@ Jojomon est un jeu basé uniquement sur la **phase de combat** de **Pokemon** av
 - Crates:
     - [GGEZ](https://github.com/ggez/ggez#what-is-this)
     - [Amethyst/Legion](https://github.com/amethyst/legion)
+
+### Références :
+- [Pokemon](https://fr.wikipedia.org/wiki/Pok%C3%A9mon)
+- [Jojo's Bizarre Adventure](https://fr.wikipedia.org/wiki/JoJo%27s_Bizarre_Adventure)
