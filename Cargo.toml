@@ -1,7 +1,7 @@
 [package]
-name = "jojo-mon"
+name = "jojomon"
 version = "0.0.1"
-authors = ["Bibi210 <brahimadibassi@gmail.com>,Qepron <>"]
+authors = ["Bibi210 <brahimadibassi@gmail.com>,Qepron <Qepron@hotmail.fr>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
