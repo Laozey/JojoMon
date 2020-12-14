@@ -7,7 +7,7 @@ mod stand_data;
 use ggez::conf::{WindowMode, WindowSetup};
 use ggez::event::run;
 use ggez::{ContextBuilder, GameResult};
-use legion::*;
+use legion::World;
 use stand_data::*;
 use jojomon::MyGame;
 
@@ -16,22 +16,15 @@ use jojomon::MyGame;
 //* Process Effect and Attack Order based on Player speed
 //* Go next turn
 
+
 fn main() -> GameResult {
-    let mut world = World::default();
-    let dio = StandStats::dio();
-    let jotaro = StandStats::jotaro();
-    let perso1 = world.push((jotaro,));
-    let perso2 = world.push((dio,));
-
-    // Make a Context.
-    let window_mode = WindowMode::default().maximized(true).resizable(true);
-
+    // Make a Context
     let window_setup = WindowSetup::default()
         .title("Jojomon, Gotta Ora Ora Ora'em all!")
         .vsync(false);
 
     let (mut context, mut event_loop) = match ContextBuilder::new("Jojomon", "Quentin Epron")
-        .window_mode(window_mode)
+        .window_mode(WindowMode::default())
         .window_setup(window_setup)
         .build()
     {
