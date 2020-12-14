@@ -1,7 +1,5 @@
 mod stand_data;
 
-use std::cmp::min;
-
 use ggez::event::{EventHandler, KeyCode, KeyMods};
 use ggez::graphics::{clear, draw, present};
 use ggez::graphics::{Color, DrawMode, DrawParam, Mesh, Rect};
