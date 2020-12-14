@@ -1,16 +1,11 @@
 [package]
-name = "jojo-start-uh"
-version = "0.1.0"
-authors = ["Bibi210 <brahimadibassi@gmail.com>,Qepron <>"]
+name = "jojomon"
+version = "0.0.1"
+authors = ["Bibi210 <brahimadibassi@gmail.com>,Qepron <Qepron@hotmail.fr>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-amethyst = "0.15.1"
-
-[features]
-default = ["vulkan"]
-empty = ["amethyst/empty"]
-metal = ["amethyst/metal"]
-vulkan = ["amethyst/vulkan"]
+ggez = "0.5.1"
+legion = "0.3.1"
