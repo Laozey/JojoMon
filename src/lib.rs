@@ -1,8 +1,8 @@
 mod stand_data;
 
 use ggez::event::{EventHandler, KeyCode, KeyMods};
-use ggez::graphics::{clear, draw, present};
 use ggez::graphics::{Color, DrawMode, DrawParam, Mesh, Rect};
+use ggez::graphics::{clear, draw, present};
 use ggez::mint::Vector2;
 use ggez::{Context, GameResult};
 use legion::World;
