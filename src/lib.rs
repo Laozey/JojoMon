@@ -5,10 +5,13 @@ use ggez::graphics::{Color, DrawMode, DrawParam, Mesh, Rect};
 use ggez::graphics::{clear, draw, present};
 use ggez::mint::Vector2;
 use ggez::{Context, GameResult};
+use stand_data::*;
 
 pub struct MyGame {
     // Your state here...
     pub turn: u32,
+    pub j1_attacks: Vec<Attacks>,
+    pub j2_attacks: Vec<Attacks>
 }
 
 impl MyGame {
@@ -29,6 +32,7 @@ impl EventHandler for MyGame {
             // Player 1 turn ...
             match keycode {
                 k @ KeyCode::A | k @ KeyCode::Z | k @ KeyCode::Q | k @ KeyCode::S => {
+                    self.j1.push(select_attack(&joueur_1));
                     println!("You pressed the {:?} Key !", &k);
                     self.turn += 1;
                 }
