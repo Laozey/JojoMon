@@ -5,30 +5,13 @@ use ggez::graphics::{Color, DrawMode, DrawParam, Mesh, Rect};
 use ggez::graphics::{clear, draw, present};
 use ggez::mint::Vector2;
 use ggez::{Context, GameResult};
-use legion::World;
-use stand_data::StandStats;
 
 pub struct MyGame {
     // Your state here...
-    world: World,
-    turn: u32,
+    pub turn: u32,
 }
 
 impl MyGame {
-    pub fn new(_context: &mut Context) -> MyGame {
-        // Load/create resources such as images here.
-        let mut w = World::default();
-        let dio = StandStats::dio();
-        let jotaro = StandStats::jotaro();
-        let perso1 = w.push((jotaro,));
-        let perso2 = w.push((dio,));
-        MyGame {
-            // ...
-            world: w,
-            turn: 0,
-        }
-    }
-
     fn process() {
         // Process all events separetely from the event handler
         println!("Ora to Muda")

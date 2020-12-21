@@ -1,13 +1,13 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 #![allow(unused_imports)]
+#![allow(unused_mut)]
 
 mod stand_data;
 
 use ggez::conf::{WindowMode, WindowSetup};
 use ggez::event::run;
 use ggez::{ContextBuilder, GameResult};
-use legion::World;
 use stand_data::*;
 use jojomon::MyGame;
 
@@ -35,8 +35,7 @@ fn main() -> GameResult {
     // Create an instance of your event handler.
     // Usually, you should provide it with the Context object to
     // use when setting your game up.
-    let mut my_game = MyGame::new(&mut context);
-
+    let mut my_game = MyGame{turn: 0};
     // Run!
     Ok(match run(&mut context, &mut event_loop, &mut my_game) {
         Ok(_) => println!("Exited cleanly."),
