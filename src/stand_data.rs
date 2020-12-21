@@ -21,35 +21,54 @@ pub struct StandInfo {
     pub attack4: Attacks,
 }
 impl StandInfo {
+    pub fn new(
+        name: String,
+        hp: i32,
+        speed: i32,
+        strength: i32,
+        attack1: Attacks,
+        attack2: Attacks,
+        attack3: Attacks,
+        attack4: Attacks,
+    ) -> StandInfo {
+        StandInfo {
+            name,
+            hp_max: hp,
+            hp,
+            speed_max: speed,
+            speed,
+            strength,
+            strength_max: strength,
+            attack1,
+            attack2,
+            attack3,
+            attack4,
+        }
+    }
+
     pub fn dio() -> StandInfo {
-        return StandInfo {
-            name: "Dio".to_string(),
-            hp_max: 200,
-            hp: 200,
-            speed_max:15,
-            speed: 15,
-            strength_max:10,
-            strength: 10,
-            attack1: Attacks::Muda,
-            attack2: Attacks::RoadRoller,
-            attack3: Attacks::Charisme(2),
-            attack4: Attacks::Zawarudo,
-        };
+        return StandInfo::new(
+            "Dio".to_string(),
+            200,
+            15,
+            10,
+            Attacks::Muda,
+            Attacks::RoadRoller,
+            Attacks::Charisme(2),
+            Attacks::Zawarudo,
+        );
     }
     pub fn jotaro() -> StandInfo {
-        return StandInfo {
-            name: "Jotaro".to_string(),
-            hp_max: 200,
-            hp: 200,
-            speed_max: 15,
-            speed: 15,
-            strength_max:15,
-            strength: 10,
-            attack1: Attacks::Ora,
-            attack2: Attacks::Facture,
-            attack3: Attacks::MotherSoul(2),
-            attack4: Attacks::Zawarudo,
-        };
+        return StandInfo::new(
+            "Jotaro".to_string(),
+            200,
+            15,
+            10,
+            Attacks::Ora,
+            Attacks::Facture,
+            Attacks::MotherSoul(2),
+            Attacks::Zawarudo,
+        );
     }
 }
 
@@ -59,7 +78,6 @@ pub fn faster_than(stand1: &StandInfo, stand2: &StandInfo) -> bool {
     }
     return false;
 }
-
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Attacks {
     Zawarudo,
@@ -79,7 +97,7 @@ pub fn basic_attack(attaquant: &mut StandInfo, receveur: &mut StandInfo, dmg: i3
 pub fn charisme(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
     //* est la force du soin de charisme
     attaquant.hp += 30;
-    println!("{} ce soigne de :30",attaquant.name);
+    println!("{} ce soigne de :30", attaquant.name);
     if attaquant.hp > attaquant.hp_max {
         attaquant.hp = attaquant.hp_max;
     }
@@ -89,9 +107,15 @@ pub fn beat_up(attaquant: &mut StandInfo, receveur: &mut StandInfo, dmg: i32) {
     let mut degat_inflige = attaquant.strength * dmg;
     if rng.gen_range(0, 10) <= 3 {
         degat_inflige *= 2;
-        println!("Coup critique de {} inflige {} degats a {}", attaquant.name,degat_inflige ,receveur.name);
+        println!(
+            "Coup critique de {} inflige {} degats a {}",
+            attaquant.name, degat_inflige, receveur.name
+        );
     } else {
-        println!("{} inflige {} degats a {}", attaquant.name,degat_inflige,receveur.name);
+        println!(
+            "{} inflige {} degats a {}",
+            attaquant.name, degat_inflige, receveur.name
+        );
     }
     receveur.hp -= degat_inflige;
 }
@@ -100,7 +124,10 @@ pub fn mother_soul(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
     let mut rng = rand::thread_rng();
     if rng.gen_range(0, 10) == 1 {
         receveur.hp = 0;
-        println!("{} Inflige un coup critique a {} il meurt sous la pression", attaquant.name,receveur.name);
+        println!(
+            "{} Inflige un coup critique a {} il meurt sous la pression",
+            attaquant.name, receveur.name
+        );
     } else {
         //TODO Retirer des stats
     }
@@ -113,14 +140,14 @@ pub fn long_effect_attack(attaque_to_test: &Attacks) -> bool {
             } else {
                 return true;
             }
-        },
+        }
         Attacks::MotherSoul(duration) => {
             if *duration == 0 {
                 return false;
             } else {
                 return true;
             }
-        },
+        }
         _ => return false,
     }
 }
