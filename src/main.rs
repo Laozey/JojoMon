@@ -10,9 +10,10 @@ use ggez::event::{EventHandler, KeyCode, KeyMods};
 use ggez::graphics::*;
 use ggez::mint::Vector2;
 use ggez::nalgebra as na;
-use na::*;
 use ggez::timer::fps;
 use ggez::{Context, ContextBuilder, GameResult};
+use na::*;
+use ggez::audio::*;
 use stand_data::*;
 
 pub struct MyGame {
@@ -27,16 +28,17 @@ pub struct MyGame {
 
     j1_selected_attacks: Attacks,
     j2_selected_attacks: Attacks,
+    sounds: Vec<Source>
 }
 
 impl MyGame {
-    fn process(&mut self) {
+    fn process(&mut self,ctx: &mut Context) {
         if faster_than(&self.j1_data, &self.j2_data) {
-            process_attack(&mut self.j1_data, &mut self.j2_data, &mut self.j1_attacks);
-            process_attack(&mut self.j2_data, &mut self.j1_data, &mut self.j2_attacks);
+            process_attack(&mut self.j1_data, &mut self.j2_data, &mut self.j1_attacks,ctx);
+            process_attack(&mut self.j2_data, &mut self.j1_data, &mut self.j2_attacks,ctx);
         } else {
-            process_attack(&mut self.j2_data, &mut self.j1_data, &mut self.j2_attacks);
-            process_attack(&mut self.j1_data, &mut self.j2_data, &mut self.j1_attacks);
+            process_attack(&mut self.j2_data, &mut self.j1_data, &mut self.j2_attacks,ctx);
+            process_attack(&mut self.j1_data, &mut self.j2_data, &mut self.j1_attacks,ctx);
         }
     }
 
@@ -163,7 +165,8 @@ impl MyGame {
         }
 
         // Display doc
-        let mut help = Text::new("Try press A, Z, E or R...\nPress 'ctrl + key' to display tooltip");
+        let mut help =
+            Text::new("Try press A, Z, E or R...\nPress 'ctrl + key' to display tooltip");
         help.set_font(hello_world_font, Scale::uniform(15.0));
         draw(
             context,
@@ -174,8 +177,7 @@ impl MyGame {
         let mut fps_text;
         if fps(context) as u64 > 300 {
             fps_text = Text::new("Fps > 300");
-        }
-        else {
+        } else {
             fps_text = Text::new(format!("Fps : {}", fps(context).round()).to_string());
         }
         fps_text.set_font(hello_world_font, Scale::uniform(15.0));
@@ -186,7 +188,10 @@ impl MyGame {
         )?;
 
         // Display turn
-        let mut turn = Text::new(String::from(format!("turn {}", ((self.turn / 2) + 1).to_string())));
+        let mut turn = Text::new(String::from(format!(
+            "turn {}",
+            ((self.turn / 2) + 1).to_string()
+        )));
         turn.set_font(hello_world_font, Scale::uniform(30.0));
         draw(
             context,
@@ -194,7 +199,7 @@ impl MyGame {
             DrawParam::default().dest(Point2::new(355.0, 470.0)),
         )?;
 
-        let mut j1_hp= Text::new(String::from("J1 hp : "));
+        let mut j1_hp = Text::new(String::from("J1 hp : "));
         let hp = TextFragment::new(self.j1_data.hp.to_string()).color(Color::from_rgb(255, 30, 30));
         j1_hp.add(hp);
         j1_hp.set_font(hello_world_font, Scale::uniform(20.0));
@@ -204,7 +209,7 @@ impl MyGame {
             DrawParam::default().dest(Point2::new(20.0, 315.0)),
         )?;
 
-        let mut j2_hp= Text::new(String::from("J2 hp : "));
+        let mut j2_hp = Text::new(String::from("J2 hp : "));
         let hp = TextFragment::new(self.j2_data.hp.to_string()).color(Color::from_rgb(255, 30, 30));
         j2_hp.add(hp);
         j2_hp.set_font(hello_world_font, Scale::uniform(20.0));
@@ -216,31 +221,56 @@ impl MyGame {
 
         Ok(())
     }
-    
+
     fn display_menu(&self, context: &mut Context) -> GameResult {
         let mut title = Text::new("Jojo-Mon");
         title.set_font(Font::default(), Scale::uniform(40.0));
-        queue_text(context, &title, Point2::new(325.0, 10.0), Some(Color::from_rgb(255, 255, 255)));
+        queue_text(
+            context,
+            &title,
+            Point2::new(325.0, 10.0),
+            Some(Color::from_rgb(255, 255, 255)),
+        );
 
         let image = Image::new(context, "/uxu4w1zqggn51.png")?;
-        draw(context, &image, DrawParam::default().dest(Point2::new(130.0, 100.0)).scale(na::Vector2::new(0.5, 0.5)))?;
+        draw(
+            context,
+            &image,
+            DrawParam::default()
+                .dest(Point2::new(130.0, 100.0))
+                .scale(na::Vector2::new(0.5, 0.5)),
+        )?;
 
         //Press Return to play...
         let mut t1 = Text::new("Press");
         t1.set_font(Font::default(), Scale::uniform(20.0));
-        queue_text(context, &t1, Point2::new(300.0, 550.0), Some(Color::from_rgb(255, 255, 255)));
-        
+        queue_text(
+            context,
+            &t1,
+            Point2::new(300.0, 550.0),
+            Some(Color::from_rgb(255, 255, 255)),
+        );
+
         let mut t2 = Text::new("Return");
         t2.set_font(Font::default(), Scale::uniform(20.0));
-        queue_text(context, &t2, Point2::new(355.0, 550.0), Some(Color::from_rgb(255, 200, 90)));
+        queue_text(
+            context,
+            &t2,
+            Point2::new(355.0, 550.0),
+            Some(Color::from_rgb(255, 200, 90)),
+        );
 
         let mut t3 = Text::new("to play...");
         t3.set_font(Font::default(), Scale::uniform(20.0));
-        queue_text(context, &t3, Point2::new(420.0, 550.0), Some(Color::from_rgb(255, 255, 255)));
+        queue_text(
+            context,
+            &t3,
+            Point2::new(420.0, 550.0),
+            Some(Color::from_rgb(255, 255, 255)),
+        );
 
-        
         draw_queued_text(context, DrawParam::default(), None, FilterMode::Linear)?;
-        
+
         Ok(())
     }
 }
@@ -250,9 +280,9 @@ impl EventHandler for MyGame {
         // Update code here...
         Ok(())
     }
-    
-    fn key_up_event(&mut self, _context: &mut Context, keycode: KeyCode, keymods: KeyMods) {
-        // Menu 
+
+    fn key_up_event(&mut self, context: &mut Context, keycode: KeyCode, keymods: KeyMods) {
+        // Menu
         if self.scene == 0 {
             if keycode == KeyCode::Return {
                 self.scene = 1
@@ -284,7 +314,7 @@ impl EventHandler for MyGame {
                             self.j2_attacks.push(select_attack(&self.j2_data, k));
                             self.j2_selected_attacks = self.j2_attacks[0];
                             self.turn += 1;
-                            self.process();
+                            self.process(context);
                         }
                     }
                     _ => (),
@@ -298,19 +328,17 @@ impl EventHandler for MyGame {
         if self.scene == 0 {
             clear(context, Color::from_rgb(120, 120, 120));
             self.display_menu(context)?;
-        }
-        else if self.scene == 1 {
-
+        } else if self.scene == 1 {
             clear(context, Color::from_rgb(120, 120, 120));
             // Draw code here...
             let mut attack_meshes: Vec<Mesh> = Vec::new();
-    
+
             // Button rect, color and offsets
             let mut rect = Rect::new(25.0, 400.0, 100.0, 75.0);
             let mut offset = Vector2 { x: 0.0, y: 0.0 };
             let mut rcolor = Color::from_rgb(255, 240, 100);
             let mut rcolor_switch: (u8, u8, u8) = (255, 240, 100);
-    
+
             // Create a mesh then move the offset (UI)
             for i in 0..=7 {
                 match i {
@@ -345,7 +373,7 @@ impl EventHandler for MyGame {
             for meshe in attack_meshes {
                 draw(context, &meshe, DrawParam::default())?;
             }
-            
+
             let line_mesh = MeshBuilder::new()
                 .line(
                     &[Point2::new(0.0, 305.0), Point2::new(800.0, 305.0)],
@@ -354,227 +382,318 @@ impl EventHandler for MyGame {
                 )?
                 .build(context)?;
             draw(context, &line_mesh, DrawParam::default())?;
-            
-            if self.turn%2 == 0 && self.turn > 0 {
+
+            if self.turn % 2 == 0 && self.turn > 0 {
                 if self.j1_data.speed > self.j2_data.speed {
                     let mut process_display = Text::new("");
-                    let t1 = TextFragment::new( self.j1_data.name.to_string()).color(Color::from_rgb(30, 70, 255));
+                    let t1 = TextFragment::new(self.j1_data.name.to_string())
+                        .color(Color::from_rgb(30, 70, 255));
                     process_display.add(t1);
                     let t2 = TextFragment::new(" attacked J2 with ");
                     process_display.add(t2);
                     let t3;
-                    let t4; 
+                    let t4;
                     let t5;
                     match self.j1_selected_attacks {
-                        Attacks::Zawarudo => {t3 = TextFragment::new("Zawarudo").color(Color::from_rgb(255, 200, 90));
-                        t4 = TextFragment::new("dealing ");
-                    t5 = TextFragment::new("0").color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t3);
-                    process_display.add(t4);
-                    process_display.add(t5);},
-                        Attacks::Muda => {t3 = TextFragment::new("Muda").color(Color::from_rgb(255, 200, 90));
-                        t4 = TextFragment::new("dealing ");
-                    t5 = TextFragment::new("a lot of damage").color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t3);
-                    process_display.add(t4);
-                    process_display.add(t5);},
-                        Attacks::RoadRoller => {t3 = TextFragment::new("Road Roller").color(Color::from_rgb(255, 200, 90));
-                        t4 = TextFragment::new("dealing ");
-                    t5 = TextFragment::new( (self.j1_data.strength * 4).to_string()).color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t3);
-                    process_display.add(t4);
-                    process_display.add(t5);},
-                        Attacks::Charisme(_) => {t3 = TextFragment::new("Charisme").color(Color::from_rgb(255, 200, 90));
-                        t4 = TextFragment::new("receiving ");
-                    t5 = TextFragment::new("30").color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t3);
-                    process_display.add(t4);
-                    process_display.add(t5);},
-                        Attacks::MotherSoul(_) => {t3 = TextFragment::new("Mother Soul").color(Color::from_rgb(255, 200, 90));
-                        t4 = TextFragment::new("sworning on his mother soul");
-                        process_display.add(t3);
-                        process_display.add(t4);},
-                        Attacks::Ora => {t3 = TextFragment::new("Ora").color(Color::from_rgb(255, 200, 90));
-                        t4 = TextFragment::new("dealing ");
-                    t5 = TextFragment::new("a lot of damage").color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t3);
-                    process_display.add(t4);
-                    process_display.add(t5);},
-                        Attacks::Facture => {t3 = TextFragment::new("Facture").color(Color::from_rgb(255, 200, 90));
-                        t4 = TextFragment::new("dealing ");
-                    t5 = TextFragment::new((self.j1_data.strength * 4).to_string()).color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t3);
-                    process_display.add(t4);
-                    process_display.add(t5);},
+                        Attacks::Zawarudo => {
+                            t3 = TextFragment::new("Zawarudo").color(Color::from_rgb(255, 200, 90));
+                            t4 = TextFragment::new("dealing ");
+                            t5 = TextFragment::new("0").color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t3);
+                            process_display.add(t4);
+                            process_display.add(t5);
+                        }
+                        Attacks::Muda => {
+                            t3 = TextFragment::new("Muda").color(Color::from_rgb(255, 200, 90));
+                            t4 = TextFragment::new("dealing ");
+                            t5 = TextFragment::new("a lot of damage")
+                                .color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t3);
+                            process_display.add(t4);
+                            process_display.add(t5);
+                        }
+                        Attacks::RoadRoller => {
+                            t3 = TextFragment::new("Road Roller")
+                                .color(Color::from_rgb(255, 200, 90));
+                            t4 = TextFragment::new("dealing ");
+                            t5 = TextFragment::new((self.j1_data.strength * 4).to_string())
+                                .color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t3);
+                            process_display.add(t4);
+                            process_display.add(t5);
+                        }
+                        Attacks::Charisme(_) => {
+                            t3 = TextFragment::new("Charisme").color(Color::from_rgb(255, 200, 90));
+                            t4 = TextFragment::new("receiving ");
+                            t5 = TextFragment::new("30").color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t3);
+                            process_display.add(t4);
+                            process_display.add(t5);
+                        }
+                        Attacks::MotherSoul(_) => {
+                            t3 = TextFragment::new("Mother Soul")
+                                .color(Color::from_rgb(255, 200, 90));
+                            t4 = TextFragment::new("sworning on his mother soul");
+                            process_display.add(t3);
+                            process_display.add(t4);
+                        }
+                        Attacks::Ora => {
+                            t3 = TextFragment::new("Ora").color(Color::from_rgb(255, 200, 90));
+                            t4 = TextFragment::new("dealing ");
+                            t5 = TextFragment::new("a lot of damage")
+                                .color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t3);
+                            process_display.add(t4);
+                            process_display.add(t5);
+                        }
+                        Attacks::Facture => {
+                            t3 = TextFragment::new("Facture").color(Color::from_rgb(255, 200, 90));
+                            t4 = TextFragment::new("dealing ");
+                            t5 = TextFragment::new((self.j1_data.strength * 4).to_string())
+                                .color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t3);
+                            process_display.add(t4);
+                            process_display.add(t5);
+                        }
                         Attacks::None => (),
                     }
                     let t6 = TextFragment::new("... ");
                     process_display.add(t6);
-                    let t7 = TextFragment::new( self.j2_data.name.to_string()).color(Color::from_rgb(255, 30, 30));
+                    let t7 = TextFragment::new(self.j2_data.name.to_string())
+                        .color(Color::from_rgb(255, 30, 30));
                     process_display.add(t7);
                     let t8 = TextFragment::new(" retaliated with ");
                     process_display.add(t8);
-                    
+
                     let t9;
                     let t10;
-                    let t11;               
+                    let t11;
                     match self.j2_selected_attacks {
-                        Attacks::Zawarudo => {t9 = TextFragment::new("Zawarudo").color(Color::from_rgb(255, 200, 90));
-                        t10 = TextFragment::new("dealing ");
-                    t11 = TextFragment::new("0").color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t9);
-                    process_display.add(t10);
-                    process_display.add(t11);},
-                        Attacks::Muda => {t9 = TextFragment::new("Muda").color(Color::from_rgb(255, 200, 90));
-                        t10 = TextFragment::new("dealing ");
-                    t11 = TextFragment::new("a lot of damage").color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t9);
-                    process_display.add(t10);
-                    process_display.add(t11);},
-                        Attacks::RoadRoller => {t9 = TextFragment::new("Road Roller").color(Color::from_rgb(255, 200, 90));
-                        t10 = TextFragment::new("dealing ");
-                    t11 = TextFragment::new( (self.j2_data.strength * 4).to_string()).color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t9);
-                    process_display.add(t10);
-                    process_display.add(t11);},
-                        Attacks::Charisme(_) => {t9 = TextFragment::new("Charisme").color(Color::from_rgb(255, 200, 90));
-                        t10 = TextFragment::new("receiving ");
-                    t11 = TextFragment::new("30").color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t9);
-                    process_display.add(t10);
-                    process_display.add(t11);},
-                        Attacks::MotherSoul(_) => {t9 = TextFragment::new("Mother Soul").color(Color::from_rgb(255, 200, 90));
-                        t10 = TextFragment::new("sworning on his mother soul");
-                        process_display.add(t9);
-                        process_display.add(t10);},
-                        Attacks::Ora => {t9 = TextFragment::new("Ora").color(Color::from_rgb(255, 200, 90));
-                        t10 = TextFragment::new("dealing ");
-                    t11 = TextFragment::new("a lot of damage").color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t9);
-                    process_display.add(t10);
-                    process_display.add(t11);},
-                        Attacks::Facture => {t9 = TextFragment::new("Facture").color(Color::from_rgb(255, 200, 90));
-                        t10 = TextFragment::new("dealing ");
-                    t11 = TextFragment::new((self.j2_data.strength * 4).to_string()).color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t9);
-                    process_display.add(t10);
-                    process_display.add(t11);},
+                        Attacks::Zawarudo => {
+                            t9 = TextFragment::new("Zawarudo").color(Color::from_rgb(255, 200, 90));
+                            t10 = TextFragment::new("dealing ");
+                            t11 = TextFragment::new("0").color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t9);
+                            process_display.add(t10);
+                            process_display.add(t11);
+                        }
+                        Attacks::Muda => {
+                            t9 = TextFragment::new("Muda").color(Color::from_rgb(255, 200, 90));
+                            t10 = TextFragment::new("dealing ");
+                            t11 = TextFragment::new("a lot of damage")
+                                .color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t9);
+                            process_display.add(t10);
+                            process_display.add(t11);
+                        }
+                        Attacks::RoadRoller => {
+                            t9 = TextFragment::new("Road Roller")
+                                .color(Color::from_rgb(255, 200, 90));
+                            t10 = TextFragment::new("dealing ");
+                            t11 = TextFragment::new((self.j2_data.strength * 4).to_string())
+                                .color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t9);
+                            process_display.add(t10);
+                            process_display.add(t11);
+                        }
+                        Attacks::Charisme(_) => {
+                            t9 = TextFragment::new("Charisme").color(Color::from_rgb(255, 200, 90));
+                            t10 = TextFragment::new("receiving ");
+                            t11 = TextFragment::new("30").color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t9);
+                            process_display.add(t10);
+                            process_display.add(t11);
+                        }
+                        Attacks::MotherSoul(_) => {
+                            t9 = TextFragment::new("Mother Soul")
+                                .color(Color::from_rgb(255, 200, 90));
+                            t10 = TextFragment::new("sworning on his mother soul");
+                            process_display.add(t9);
+                            process_display.add(t10);
+                        }
+                        Attacks::Ora => {
+                            t9 = TextFragment::new("Ora").color(Color::from_rgb(255, 200, 90));
+                            t10 = TextFragment::new("dealing ");
+                            t11 = TextFragment::new("a lot of damage")
+                                .color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t9);
+                            process_display.add(t10);
+                            process_display.add(t11);
+                        }
+                        Attacks::Facture => {
+                            t9 = TextFragment::new("Facture").color(Color::from_rgb(255, 200, 90));
+                            t10 = TextFragment::new("dealing ");
+                            t11 = TextFragment::new((self.j2_data.strength * 4).to_string())
+                                .color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t9);
+                            process_display.add(t10);
+                            process_display.add(t11);
+                        }
                         Attacks::None => (),
                     }
                     let t12 = TextFragment::new("!");
                     process_display.add(t12);
                     process_display.set_font(Font::default(), Scale::uniform(13.0));
-                    draw(context, &process_display, DrawParam::default().dest(na::Point2::new(20.0, 280.0)))?;
-                }
-                else {
+                    draw(
+                        context,
+                        &process_display,
+                        DrawParam::default().dest(na::Point2::new(20.0, 280.0)),
+                    )?;
+                } else {
                     let mut process_display = Text::new("");
-                    let t1 = TextFragment::new( self.j2_data.name.to_string()).color(Color::from_rgb(255, 30, 30));
+                    let t1 = TextFragment::new(self.j2_data.name.to_string())
+                        .color(Color::from_rgb(255, 30, 30));
                     process_display.add(t1);
                     let t2 = TextFragment::new(" attacked J1 with ");
                     process_display.add(t2);
                     let t3;
-                    let t4; 
+                    let t4;
                     let t5;
                     match self.j2_selected_attacks {
-                        Attacks::Zawarudo => {t3 = TextFragment::new("Zawarudo").color(Color::from_rgb(255, 200, 90));
-                        t4 = TextFragment::new(" dealing ");
-                    t5 = TextFragment::new("0").color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t3);
-                    process_display.add(t4);
-                    process_display.add(t5);},
-                        Attacks::Muda => {t3 = TextFragment::new("Muda").color(Color::from_rgb(255, 200, 90));
-                        t4 = TextFragment::new(" dealing ");
-                    t5 = TextFragment::new("a lot of damage").color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t3);
-                    process_display.add(t4);
-                    process_display.add(t5);},
-                        Attacks::RoadRoller => {t3 = TextFragment::new("Road Roller").color(Color::from_rgb(255, 200, 90));
-                        t4 = TextFragment::new(" dealing ");
-                    t5 = TextFragment::new( (self.j2_data.strength * 4).to_string()).color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t3);
-                    process_display.add(t4);
-                    process_display.add(t5);},
-                        Attacks::Charisme(_) => {t3 = TextFragment::new("Charisme").color(Color::from_rgb(255, 200, 90));
-                        t4 = TextFragment::new(" receiving ");
-                    t5 = TextFragment::new("30").color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t3);
-                    process_display.add(t4);
-                    process_display.add(t5);},
-                        Attacks::MotherSoul(_) => {t3 = TextFragment::new("Mother Soul").color(Color::from_rgb(255, 200, 90));
-                        t4 = TextFragment::new(" sworning on his mother soul");
-                        process_display.add(t3);
-                        process_display.add(t4);},
-                        Attacks::Ora => {t3 = TextFragment::new("Ora").color(Color::from_rgb(255, 200, 90));
-                        t4 = TextFragment::new(" dealing ");
-                    t5 = TextFragment::new("a lot of damage").color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t3);
-                    process_display.add(t4);
-                    process_display.add(t5);},
-                        Attacks::Facture => {t3 = TextFragment::new("Facture").color(Color::from_rgb(255, 200, 90));
-                        t4 = TextFragment::new(" dealing ");
-                    t5 = TextFragment::new((self.j2_data.strength * 4).to_string()).color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t3);
-                    process_display.add(t4);
-                    process_display.add(t5);},
+                        Attacks::Zawarudo => {
+                            t3 = TextFragment::new("Zawarudo").color(Color::from_rgb(255, 200, 90));
+                            t4 = TextFragment::new(" dealing ");
+                            t5 = TextFragment::new("0").color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t3);
+                            process_display.add(t4);
+                            process_display.add(t5);
+                        }
+                        Attacks::Muda => {
+                            t3 = TextFragment::new("Muda").color(Color::from_rgb(255, 200, 90));
+                            t4 = TextFragment::new(" dealing ");
+                            t5 = TextFragment::new("a lot of damage")
+                                .color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t3);
+                            process_display.add(t4);
+                            process_display.add(t5);
+                        }
+                        Attacks::RoadRoller => {
+                            t3 = TextFragment::new("Road Roller")
+                                .color(Color::from_rgb(255, 200, 90));
+                            t4 = TextFragment::new(" dealing ");
+                            t5 = TextFragment::new((self.j2_data.strength * 4).to_string())
+                                .color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t3);
+                            process_display.add(t4);
+                            process_display.add(t5);
+                        }
+                        Attacks::Charisme(_) => {
+                            t3 = TextFragment::new("Charisme").color(Color::from_rgb(255, 200, 90));
+                            t4 = TextFragment::new(" receiving ");
+                            t5 = TextFragment::new("30").color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t3);
+                            process_display.add(t4);
+                            process_display.add(t5);
+                        }
+                        Attacks::MotherSoul(_) => {
+                            t3 = TextFragment::new("Mother Soul")
+                                .color(Color::from_rgb(255, 200, 90));
+                            t4 = TextFragment::new(" sworning on his mother soul");
+                            process_display.add(t3);
+                            process_display.add(t4);
+                        }
+                        Attacks::Ora => {
+                            t3 = TextFragment::new("Ora").color(Color::from_rgb(255, 200, 90));
+                            t4 = TextFragment::new(" dealing ");
+                            t5 = TextFragment::new("a lot of damage")
+                                .color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t3);
+                            process_display.add(t4);
+                            process_display.add(t5);
+                        }
+                        Attacks::Facture => {
+                            t3 = TextFragment::new("Facture").color(Color::from_rgb(255, 200, 90));
+                            t4 = TextFragment::new(" dealing ");
+                            t5 = TextFragment::new((self.j2_data.strength * 4).to_string())
+                                .color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t3);
+                            process_display.add(t4);
+                            process_display.add(t5);
+                        }
                         Attacks::None => (),
                     }
                     let t6 = TextFragment::new("... ");
                     process_display.add(t6);
-                    let t7 = TextFragment::new( self.j1_data.name.to_string()).color(Color::from_rgb(30, 70, 255));
+                    let t7 = TextFragment::new(self.j1_data.name.to_string())
+                        .color(Color::from_rgb(30, 70, 255));
                     process_display.add(t7);
                     let t8 = TextFragment::new(" retaliated with ");
                     process_display.add(t8);
-                    
+
                     let t9;
                     let t10;
-                    let t11;               
+                    let t11;
                     match self.j1_selected_attacks {
-                        Attacks::Zawarudo => {t9 = TextFragment::new("Zawarudo").color(Color::from_rgb(255, 200, 90));
-                        t10 = TextFragment::new(" dealing ");
-                    t11 = TextFragment::new("0").color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t9);
-                    process_display.add(t10);
-                    process_display.add(t11);},
-                        Attacks::Muda => {t9 = TextFragment::new("Muda").color(Color::from_rgb(255, 200, 90));
-                        t10 = TextFragment::new(" dealing ");
-                    t11 = TextFragment::new("a lot of damage").color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t9);
-                    process_display.add(t10);
-                    process_display.add(t11);},
-                        Attacks::RoadRoller => {t9 = TextFragment::new("Road Roller").color(Color::from_rgb(255, 200, 90));
-                        t10 = TextFragment::new(" dealing ");
-                    t11 = TextFragment::new( (self.j1_data.strength * 4).to_string()).color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t9);
-                    process_display.add(t10);
-                    process_display.add(t11);},
-                        Attacks::Charisme(_) => {t9 = TextFragment::new("Charisme").color(Color::from_rgb(255, 200, 90));
-                        t10 = TextFragment::new(" receiving ");
-                    t11 = TextFragment::new("30").color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t9);
-                    process_display.add(t10);
-                    process_display.add(t11);},
-                        Attacks::MotherSoul(_) => {t9 = TextFragment::new("Mother Soul").color(Color::from_rgb(255, 200, 90));
-                        t10 = TextFragment::new(" sworning on his mother soul");
-                        process_display.add(t9);
-                        process_display.add(t10);},
-                        Attacks::Ora => {t9 = TextFragment::new("Ora").color(Color::from_rgb(255, 200, 90));
-                        t10 = TextFragment::new(" dealing ");
-                    t11 = TextFragment::new("a lot of damage").color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t9);
-                    process_display.add(t10);
-                    process_display.add(t11);},
-                        Attacks::Facture => {t9 = TextFragment::new("Facture").color(Color::from_rgb(255, 200, 90));
-                        t10 = TextFragment::new(" dealing ");
-                    t11 = TextFragment::new((self.j1_data.strength * 4).to_string()).color(Color::from_rgb(30, 255, 80));
-                    process_display.add(t9);
-                    process_display.add(t10);
-                    process_display.add(t11);},
+                        Attacks::Zawarudo => {
+                            t9 = TextFragment::new("Zawarudo").color(Color::from_rgb(255, 200, 90));
+                            t10 = TextFragment::new(" dealing ");
+                            t11 = TextFragment::new("0").color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t9);
+                            process_display.add(t10);
+                            process_display.add(t11);
+                        }
+                        Attacks::Muda => {
+                            t9 = TextFragment::new("Muda").color(Color::from_rgb(255, 200, 90));
+                            t10 = TextFragment::new(" dealing ");
+                            t11 = TextFragment::new("a lot of damage")
+                                .color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t9);
+                            process_display.add(t10);
+                            process_display.add(t11);
+                        }
+                        Attacks::RoadRoller => {
+                            t9 = TextFragment::new("Road Roller")
+                                .color(Color::from_rgb(255, 200, 90));
+                            t10 = TextFragment::new(" dealing ");
+                            t11 = TextFragment::new((self.j1_data.strength * 4).to_string())
+                                .color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t9);
+                            process_display.add(t10);
+                            process_display.add(t11);
+                        }
+                        Attacks::Charisme(_) => {
+                            t9 = TextFragment::new("Charisme").color(Color::from_rgb(255, 200, 90));
+                            t10 = TextFragment::new(" receiving ");
+                            t11 = TextFragment::new("30").color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t9);
+                            process_display.add(t10);
+                            process_display.add(t11);
+                        }
+                        Attacks::MotherSoul(_) => {
+                            t9 = TextFragment::new("Mother Soul")
+                                .color(Color::from_rgb(255, 200, 90));
+                            t10 = TextFragment::new(" sworning on his mother soul");
+                            process_display.add(t9);
+                            process_display.add(t10);
+                        }
+                        Attacks::Ora => {
+                            t9 = TextFragment::new("Ora").color(Color::from_rgb(255, 200, 90));
+                            t10 = TextFragment::new(" dealing ");
+                            t11 = TextFragment::new("a lot of damage")
+                                .color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t9);
+                            process_display.add(t10);
+                            process_display.add(t11);
+                        }
+                        Attacks::Facture => {
+                            t9 = TextFragment::new("Facture").color(Color::from_rgb(255, 200, 90));
+                            t10 = TextFragment::new(" dealing ");
+                            t11 = TextFragment::new((self.j1_data.strength * 4).to_string())
+                                .color(Color::from_rgb(30, 255, 80));
+                            process_display.add(t9);
+                            process_display.add(t10);
+                            process_display.add(t11);
+                        }
                         Attacks::None => (),
                     }
                     let t12 = TextFragment::new("!");
                     process_display.add(t12);
                     process_display.set_font(Font::default(), Scale::uniform(13.0));
-                    draw(context, &process_display, DrawParam::default().dest(na::Point2::new(20.0, 280.0)))?; 
+                    draw(
+                        context,
+                        &process_display,
+                        DrawParam::default().dest(na::Point2::new(20.0, 280.0)),
+                    )?;
                 }
             }
 
@@ -586,7 +705,7 @@ impl EventHandler for MyGame {
                 )?
                 .build(context)?;
             draw(context, &line_mesh, DrawParam::default())?;
-    
+
             self.display_level_text(context)?;
         }
 
@@ -623,8 +742,11 @@ fn main() -> GameResult {
         j2_attacks: Vec::new(),
         j1_selected_attacks: Attacks::None,
         j2_selected_attacks: Attacks::None,
+        sounds: Vec::new(),
     };
     // Run!
+    my_game.sounds.push(Attacks::Ora.sound(&mut context).unwrap());
+    my_game.sounds.push(Attacks::Muda.sound(&mut context).unwrap());
     Ok(match run(&mut context, &mut event_loop, &mut my_game) {
         Ok(_) => println!("Exited cleanly."),
         Err(error) => println!("Error occured: {}", error),

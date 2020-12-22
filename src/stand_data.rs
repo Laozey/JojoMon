@@ -3,7 +3,9 @@
 #![allow(unused_imports)]
 #![allow(unused_mut)]
 
-use ggez::graphics::TextFragment;
+use ggez::{GameError, graphics::TextFragment};
+use ggez::audio::*;
+use ggez::Context;
 use rand::Rng;
 use std::*;
 
@@ -91,6 +93,19 @@ pub enum Attacks {
     Ora,
     Facture,
     None,
+}
+impl Attacks {
+    pub fn sound(&self, context: &mut Context)->Result<Source,String> {
+        match self{
+            Attacks::Muda => Ok(Source::new(context, "/sound/muda_sound_effect.mp3").unwrap()),
+            Attacks::RoadRoller => Ok(Source::new(context, "/sound/road_roller_sound_effect.ogg").unwrap()),
+            Attacks::Charisme(_) => Ok(Source::new(context, "/sound/charisme_sound_effect.ogg").unwrap()),
+            Attacks::MotherSoul(_) => Ok(Source::new(context, "/sound/mothersoul_sound_effect.ogg").unwrap()),
+            Attacks::Ora => Ok(Source::new(context, "/sound/Ora_sound_effect.mp3").unwrap()),
+            Attacks::Facture => Ok(Source::new(context, "/sound/facture_sound_effect.ogg").unwrap()),
+            _ => return Err("Aucun audio".to_string()),
+        }
+    }
 }
 
 pub fn basic_attack(attaquant: &mut StandInfo, receveur: &mut StandInfo, dmg: i32) {
