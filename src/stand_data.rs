@@ -3,6 +3,7 @@
 #![allow(unused_imports)]
 #![allow(unused_mut)]
 
+use ggez::graphics::TextFragment;
 use rand::Rng;
 use std::*;
 
@@ -12,9 +13,9 @@ pub struct StandInfo {
     hp_max: i32,
     pub hp: i32,
     speed_max: i32,
-    speed: i32,
+    pub speed: i32,
     strength_max: i32,
-    strength: i32,
+    pub strength: i32,
     pub attack1: Attacks,
     pub attack2: Attacks,
     pub attack3: Attacks,
@@ -78,6 +79,8 @@ pub fn faster_than(stand1: &StandInfo, stand2: &StandInfo) -> bool {
     }
     return false;
 }
+
+// Ajout de string pour récup le nom de l'attaque pr le display
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Attacks {
     Zawarudo,

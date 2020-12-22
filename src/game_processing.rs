@@ -2,6 +2,7 @@ use crate::stand_data::*;
 use std::process;
 use ggez::event::KeyCode;
 
+// Ajout de string pour récup le nom de l'attaque pr le display
 pub fn process_attack(j1: &mut StandInfo, j2: &mut StandInfo, attack_to_process: &mut Vec<Attacks>) {
     for attack in attack_to_process.iter_mut() {
         match attack {
