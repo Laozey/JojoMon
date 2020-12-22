@@ -296,33 +296,22 @@ impl MyGame {
     }
 
     fn match_attacks(&self, player_attack: &Attacks, process_display: &mut Text) {
-        let t2;
-        let t3;
-        let t4;
-        let t5;
+        let mut t2= TextFragment::new("with");
+        let mut t3= TextFragment::new("");
+        let mut t4= TextFragment::new("");
+        let mut t5= TextFragment::new("");
         match player_attack {
             Attacks::Zawarudo => {
-                t2 = TextFragment::new("with ");
                 t3 = TextFragment::new("Zawarudo ").color(Color::from_rgb(255, 200, 90));
                 t4 = TextFragment::new("dealing ");
                 t5 = TextFragment::new("0").color(Color::from_rgb(30, 255, 80));
-                process_display.add(t2);
-                process_display.add(t3);
-                process_display.add(t4);
-                process_display.add(t5);
             }
             Attacks::Muda => {
-                t2 = TextFragment::new("with ");
                 t3 = TextFragment::new("Muda ").color(Color::from_rgb(255, 200, 90));
                 t4 = TextFragment::new("dealing ");
                 t5 = TextFragment::new("a lot of damage").color(Color::from_rgb(30, 255, 80));
-                process_display.add(t2);
-                process_display.add(t3);
-                process_display.add(t4);
-                process_display.add(t5);
             }
             Attacks::RoadRoller => {
-                t2 = TextFragment::new("with ");
                 t3 = TextFragment::new("Road Roller ").color(Color::from_rgb(255, 200, 90));
                 t4 = TextFragment::new("dealing ");
                 t5 = TextFragment::new(format!(
@@ -330,39 +319,23 @@ impl MyGame {
                     (self.j1_data.strength * 4).to_string()
                 ))
                 .color(Color::from_rgb(30, 255, 80));
-                process_display.add(t2);
-                process_display.add(t3);
-                process_display.add(t4);
-                process_display.add(t5);
             }
             Attacks::Charisme => {
-                t2 = TextFragment::new("with ");
                 t3 = TextFragment::new("Charisme ").color(Color::from_rgb(255, 200, 90));
                 t4 = TextFragment::new("receiving ");
                 t5 = TextFragment::new("30 hp").color(Color::from_rgb(30, 255, 80));
-                process_display.add(t2);
-                process_display.add(t3);
-                process_display.add(t4);
-                process_display.add(t5);
             }
             Attacks::MotherSoul => {
+                t2 = TextFragment::new("");
                 t3 = TextFragment::new("sworning on his ");
                 t4 = TextFragment::new("Mother's soul").color(Color::from_rgb(255, 200, 90));
-                process_display.add(t3);
-                process_display.add(t4);
             }
             Attacks::Ora => {
-                t2 = TextFragment::new("with ");
                 t3 = TextFragment::new("Ora ").color(Color::from_rgb(255, 200, 90));
                 t4 = TextFragment::new("dealing ");
                 t5 = TextFragment::new("a lot of damage").color(Color::from_rgb(30, 255, 80));
-                process_display.add(t2);
-                process_display.add(t3);
-                process_display.add(t4);
-                process_display.add(t5);
             }
             Attacks::Facture => {
-                t2 = TextFragment::new("with ");
                 t3 = TextFragment::new("Facture ").color(Color::from_rgb(255, 200, 90));
                 t4 = TextFragment::new("dealing ");
                 t5 = TextFragment::new(format!(
@@ -370,13 +343,13 @@ impl MyGame {
                     (self.j1_data.strength * 4).to_string()
                 ))
                 .color(Color::from_rgb(30, 255, 80));
-                process_display.add(t2);
-                process_display.add(t3);
-                process_display.add(t4);
-                process_display.add(t5);
             }
             Attacks::None => (),
         }
+        process_display.add(t2);
+        process_display.add(t3);
+        process_display.add(t4);
+        process_display.add(t5);
     }
 }
 
