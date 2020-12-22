@@ -1,15 +1,14 @@
 use crate::stand_data::*;
-use ggez::event::KeyCode;
-use ggez::Context;
-use std::process;
 use ggez::audio::*;
-
+use ggez::event::KeyCode;
+use std::collections::HashMap;
+use std::process;
 // Ajout de string pour récup le nom de l'attaque pr le display
 pub fn process_attack(
     j1: &mut StandInfo,
     j2: &mut StandInfo,
     attack_to_process: &mut Vec<Attacks>,
-    ctx: &mut Context,
+    sounds: &mut HashMap<Attacks, Source>,
 ) {
     for attack in attack_to_process.iter_mut() {
         match attack {
@@ -17,25 +16,15 @@ pub fn process_attack(
             Attacks::Ora => beat_up(j1, j2, 2),
             Attacks::Muda => beat_up(j1, j2, 2),
             Attacks::RoadRoller => basic_attack(j1, j2, 4),
-            Attacks::Charisme(duration) => {
-                *duration -= 1;
-                charisme(j1, j2);
-            }
-            Attacks::MotherSoul(duration) => {
-                *duration -= 1;
-                mother_soul(j1, j2);
-            }
+            Attacks::Charisme => charisme(j1, j2),
+            Attacks::MotherSoul => mother_soul(j1, j2),
             _ => (),
         }
-        if long_effect_attack(attack) == false {
-            let mut sound_to_play = attack.sound(ctx).unwrap();
-            sound_to_play.play().unwrap();
-            *attack = Attacks::None;
-        }
+        let sound_to_play = sounds.get_mut(attack).unwrap();
+        sound_to_play.play().unwrap();
+        while sound_to_play.playing() {}
     }
-
-    attack_to_process.retain(|x| *x != Attacks::None);
-
+    *attack_to_process = Vec::new();
     test_end_game(&j1, &j2);
 }
 

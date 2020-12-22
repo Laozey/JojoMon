@@ -3,9 +3,10 @@
 #![allow(unused_imports)]
 #![allow(unused_mut)]
 
-use ggez::{GameError, graphics::TextFragment};
+use collections::HashMap;
 use ggez::audio::*;
 use ggez::Context;
+use ggez::{graphics::TextFragment, GameError};
 use rand::Rng;
 use std::*;
 
@@ -57,7 +58,7 @@ impl StandInfo {
             10,
             Attacks::Muda,
             Attacks::RoadRoller,
-            Attacks::Charisme(2),
+            Attacks::Charisme,
             Attacks::Zawarudo,
         );
     }
@@ -69,7 +70,7 @@ impl StandInfo {
             10,
             Attacks::Ora,
             Attacks::Facture,
-            Attacks::MotherSoul(2),
+            Attacks::MotherSoul,
             Attacks::Zawarudo,
         );
     }
@@ -83,59 +84,93 @@ pub fn faster_than(stand1: &StandInfo, stand2: &StandInfo) -> bool {
 }
 
 // Ajout de string pour récup le nom de l'attaque pr le display
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Attacks {
     Zawarudo,
     Muda,
     RoadRoller,
-    Charisme(i32),
-    MotherSoul(i32),
+    Charisme,
+    MotherSoul,
     Ora,
     Facture,
     None,
 }
 impl Attacks {
-    pub fn sound(&self, context: &mut Context)->Result<Source,String> {
-        match self{
+    pub fn sound(&self, context: &mut Context) -> Result<Source, String> {
+        match self {
             Attacks::Muda => Ok(Source::new(context, "/sound/muda_sound_effect.mp3").unwrap()),
-            Attacks::RoadRoller => Ok(Source::new(context, "/sound/road_roller_sound_effect.ogg").unwrap()),
-            Attacks::Charisme(_) => Ok(Source::new(context, "/sound/charisme_sound_effect.ogg").unwrap()),
-            Attacks::MotherSoul(_) => Ok(Source::new(context, "/sound/mothersoul_sound_effect.ogg").unwrap()),
+            Attacks::RoadRoller => {
+                Ok(Source::new(context, "/sound/road_roller_sound_effect.ogg").unwrap())
+            }
+            Attacks::Charisme => {
+                Ok(Source::new(context, "/sound/charisme_sound_effect.ogg").unwrap())
+            }
+            Attacks::MotherSoul => {
+                Ok(Source::new(context, "/sound/mothersoul_sound_effect.ogg").unwrap())
+            }
             Attacks::Ora => Ok(Source::new(context, "/sound/Ora_sound_effect.mp3").unwrap()),
-            Attacks::Facture => Ok(Source::new(context, "/sound/facture_sound_effect.ogg").unwrap()),
+            Attacks::Facture => {
+                Ok(Source::new(context, "/sound/facture_sound_effect.ogg").unwrap())
+            }
+
             _ => return Err("Aucun audio".to_string()),
         }
     }
 }
 
+pub fn attack_sound_load(sounds: &mut HashMap<Attacks, Source>, context: &mut Context) {
+    sounds.insert(Attacks::Ora, Attacks::Ora.sound(context).unwrap());
+    sounds.insert(Attacks::Muda, Attacks::Muda.sound(context).unwrap());
+    sounds.insert(
+        Attacks::RoadRoller,
+        Attacks::RoadRoller.sound(context).unwrap(),
+    );
+    sounds.insert(Attacks::Facture, Attacks::Facture.sound(context).unwrap());
+    sounds.insert(
+        Attacks::MotherSoul,
+        Attacks::MotherSoul.sound(context).unwrap(),
+    );
+    sounds.insert(Attacks::Charisme, Attacks::Charisme.sound(context).unwrap());
+}
+
 pub fn basic_attack(attaquant: &mut StandInfo, receveur: &mut StandInfo, dmg: i32) {
-    receveur.hp -= attaquant.strength * dmg;
+    let total_dmg = attaquant.strength * dmg;
+    receveur.hp -= total_dmg;
+    println!(
+        "{} inflige {} degats a {}",
+        attaquant.name, total_dmg, receveur.name
+    );
+}
+
+pub fn basic_heal(attaquant: &mut StandInfo, receveur: &mut StandInfo, hp_recived: i32) {
+    let healing = hp_recived * attaquant.strength;
+    attaquant.hp += healing;
+    println!("{} ce soigne de :{}", attaquant.name, healing);
+    if attaquant.hp > attaquant.hp_max {
+        attaquant.hp = attaquant.hp_max;
+    }
 }
 
 pub fn charisme(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
-    //* est la force du soin de charisme
     attaquant.hp += 30;
     println!("{} ce soigne de :30", attaquant.name);
     if attaquant.hp > attaquant.hp_max {
         attaquant.hp = attaquant.hp_max;
     }
 }
+
 pub fn beat_up(attaquant: &mut StandInfo, receveur: &mut StandInfo, dmg: i32) {
     let mut rng = rand::thread_rng();
-    let mut degat_inflige = attaquant.strength * dmg;
     if rng.gen_range(0, 10) <= 3 {
-        degat_inflige *= 2;
+        let degat_inflige = attaquant.strength * dmg * 2;
         println!(
             "Coup critique de {} inflige {} degats a {}",
             attaquant.name, degat_inflige, receveur.name
         );
+        receveur.hp -= degat_inflige;
     } else {
-        println!(
-            "{} inflige {} degats a {}",
-            attaquant.name, degat_inflige, receveur.name
-        );
+        basic_attack(attaquant, receveur, dmg);
     }
-    receveur.hp -= degat_inflige;
 }
 
 pub fn mother_soul(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
@@ -148,24 +183,5 @@ pub fn mother_soul(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
         );
     } else {
         //TODO Retirer des stats
-    }
-}
-pub fn long_effect_attack(attaque_to_test: &Attacks) -> bool {
-    match attaque_to_test {
-        Attacks::Charisme(duration) => {
-            if *duration == 0 {
-                return false;
-            } else {
-                return true;
-            }
-        }
-        Attacks::MotherSoul(duration) => {
-            if *duration == 0 {
-                return false;
-            } else {
-                return true;
-            }
-        }
-        _ => return false,
     }
 }

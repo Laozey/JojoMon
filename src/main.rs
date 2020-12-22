@@ -1,9 +1,11 @@
 mod game_processing;
 mod stand_data;
 
+use std::collections::HashMap;
 use std::{path::PathBuf, vec};
 
 use game_processing::*;
+use ggez::audio::*;
 use ggez::conf::{WindowMode, WindowSetup};
 use ggez::event::run;
 use ggez::event::{EventHandler, KeyCode, KeyMods};
@@ -13,7 +15,6 @@ use ggez::nalgebra as na;
 use ggez::timer::fps;
 use ggez::{Context, ContextBuilder, GameResult};
 use na::*;
-use ggez::audio::*;
 use stand_data::*;
 
 pub struct MyGame {
@@ -28,17 +29,37 @@ pub struct MyGame {
 
     j1_selected_attacks: Attacks,
     j2_selected_attacks: Attacks,
-    sounds: Vec<Source>
+    sounds: HashMap<Attacks, Source>,
 }
 
 impl MyGame {
-    fn process(&mut self,ctx: &mut Context) {
+    fn process(&mut self) {
         if faster_than(&self.j1_data, &self.j2_data) {
-            process_attack(&mut self.j1_data, &mut self.j2_data, &mut self.j1_attacks,ctx);
-            process_attack(&mut self.j2_data, &mut self.j1_data, &mut self.j2_attacks,ctx);
+            process_attack(
+                &mut self.j1_data,
+                &mut self.j2_data,
+                &mut self.j1_attacks,
+                &mut self.sounds,
+            );
+            process_attack(
+                &mut self.j2_data,
+                &mut self.j1_data,
+                &mut self.j2_attacks,
+                &mut self.sounds,
+            );
         } else {
-            process_attack(&mut self.j2_data, &mut self.j1_data, &mut self.j2_attacks,ctx);
-            process_attack(&mut self.j1_data, &mut self.j2_data, &mut self.j1_attacks,ctx);
+            process_attack(
+                &mut self.j2_data,
+                &mut self.j1_data,
+                &mut self.j2_attacks,
+                &mut self.sounds,
+            );
+            process_attack(
+                &mut self.j1_data,
+                &mut self.j2_data,
+                &mut self.j1_attacks,
+                &mut self.sounds,
+            );
         }
     }
 
@@ -52,8 +73,8 @@ impl MyGame {
             Attacks::Zawarudo => j1_attack = Text::new("J1 selected Zawarudo !"),
             Attacks::Muda => j1_attack = Text::new("J1 selected Muda !"),
             Attacks::RoadRoller => j1_attack = Text::new("J1 selected Road Roller !"),
-            Attacks::Charisme(_) => j1_attack = Text::new("J1 selected Charisme !"),
-            Attacks::MotherSoul(_) => j1_attack = Text::new("J1 selected Mother Soul !"),
+            Attacks::Charisme => j1_attack = Text::new("J1 selected Charisme !"),
+            Attacks::MotherSoul => j1_attack = Text::new("J1 selected Mother Soul !"),
             Attacks::Ora => j1_attack = Text::new("J1 selected Ora !"),
             Attacks::Facture => j1_attack = Text::new("J1 selected Facture !"),
             Attacks::None => j1_attack = Text::new("Choose an attack !"),
@@ -72,8 +93,8 @@ impl MyGame {
             Attacks::Zawarudo => j2_attack = Text::new("J2 selected Zawarudo !"),
             Attacks::Muda => j2_attack = Text::new("J2 selected Muda  !"),
             Attacks::RoadRoller => j2_attack = Text::new("J2 selected Road Roller !"),
-            Attacks::Charisme(_) => j2_attack = Text::new("J2 selected Charisme !"),
-            Attacks::MotherSoul(_) => j2_attack = Text::new("J2 selected Mother Soul !"),
+            Attacks::Charisme => j2_attack = Text::new("J2 selected Charisme !"),
+            Attacks::MotherSoul => j2_attack = Text::new("J2 selected Mother Soul !"),
             Attacks::Ora => j2_attack = Text::new("J2 selected Ora !"),
             Attacks::Facture => j2_attack = Text::new("J2 selected Facture !"),
             Attacks::None => j2_attack = Text::new("Choose an attack !"),
@@ -106,8 +127,8 @@ impl MyGame {
                 Attacks::Zawarudo => j1_attacks_text.push(Text::new("(R) Zawarudo")),
                 Attacks::Muda => j1_attacks_text.push(Text::new("(A) Muda")),
                 Attacks::RoadRoller => j1_attacks_text.push(Text::new("(Z) Road Roller")),
-                Attacks::Charisme(_) => j1_attacks_text.push(Text::new("(E) Charisme")),
-                Attacks::MotherSoul(_) => j1_attacks_text.push(Text::new("(E) Mother Soul")),
+                Attacks::Charisme => j1_attacks_text.push(Text::new("(E) Charisme")),
+                Attacks::MotherSoul => j1_attacks_text.push(Text::new("(E) Mother Soul")),
                 Attacks::Ora => j1_attacks_text.push(Text::new("(A) Ora")),
                 Attacks::Facture => j1_attacks_text.push(Text::new("(Z) Facture")),
                 Attacks::None => j1_attacks_text.push(Text::new("")),
@@ -146,8 +167,8 @@ impl MyGame {
                 Attacks::Zawarudo => j2_attacks_text.push(Text::new("(R) Zawarudo")),
                 Attacks::Muda => j2_attacks_text.push(Text::new("(A) Muda")),
                 Attacks::RoadRoller => j2_attacks_text.push(Text::new("(Z) Road Roller")),
-                Attacks::Charisme(_) => j2_attacks_text.push(Text::new("(E) Charisme")),
-                Attacks::MotherSoul(_) => j2_attacks_text.push(Text::new("(E) Mother Soul")),
+                Attacks::Charisme => j2_attacks_text.push(Text::new("(E) Charisme")),
+                Attacks::MotherSoul => j2_attacks_text.push(Text::new("(E) Mother Soul")),
                 Attacks::Ora => j2_attacks_text.push(Text::new("(A) Ora")),
                 Attacks::Facture => j2_attacks_text.push(Text::new("(Z) Facture")),
                 Attacks::None => j2_attacks_text.push(Text::new("")),
@@ -281,7 +302,7 @@ impl EventHandler for MyGame {
         Ok(())
     }
 
-    fn key_up_event(&mut self, context: &mut Context, keycode: KeyCode, keymods: KeyMods) {
+    fn key_up_event(&mut self, _context: &mut Context, keycode: KeyCode, keymods: KeyMods) {
         // Menu
         if self.scene == 0 {
             if keycode == KeyCode::Return {
@@ -314,7 +335,7 @@ impl EventHandler for MyGame {
                             self.j2_attacks.push(select_attack(&self.j2_data, k));
                             self.j2_selected_attacks = self.j2_attacks[0];
                             self.turn += 1;
-                            self.process(context);
+                            self.process();
                         }
                     }
                     _ => (),
@@ -422,7 +443,7 @@ impl EventHandler for MyGame {
                             process_display.add(t4);
                             process_display.add(t5);
                         }
-                        Attacks::Charisme(_) => {
+                        Attacks::Charisme => {
                             t3 = TextFragment::new("Charisme").color(Color::from_rgb(255, 200, 90));
                             t4 = TextFragment::new("receiving ");
                             t5 = TextFragment::new("30").color(Color::from_rgb(30, 255, 80));
@@ -430,7 +451,7 @@ impl EventHandler for MyGame {
                             process_display.add(t4);
                             process_display.add(t5);
                         }
-                        Attacks::MotherSoul(_) => {
+                        Attacks::MotherSoul => {
                             t3 = TextFragment::new("Mother Soul")
                                 .color(Color::from_rgb(255, 200, 90));
                             t4 = TextFragment::new("sworning on his mother soul");
@@ -496,7 +517,7 @@ impl EventHandler for MyGame {
                             process_display.add(t10);
                             process_display.add(t11);
                         }
-                        Attacks::Charisme(_) => {
+                        Attacks::Charisme => {
                             t9 = TextFragment::new("Charisme").color(Color::from_rgb(255, 200, 90));
                             t10 = TextFragment::new("receiving ");
                             t11 = TextFragment::new("30").color(Color::from_rgb(30, 255, 80));
@@ -504,7 +525,7 @@ impl EventHandler for MyGame {
                             process_display.add(t10);
                             process_display.add(t11);
                         }
-                        Attacks::MotherSoul(_) => {
+                        Attacks::MotherSoul => {
                             t9 = TextFragment::new("Mother Soul")
                                 .color(Color::from_rgb(255, 200, 90));
                             t10 = TextFragment::new("sworning on his mother soul");
@@ -577,7 +598,7 @@ impl EventHandler for MyGame {
                             process_display.add(t4);
                             process_display.add(t5);
                         }
-                        Attacks::Charisme(_) => {
+                        Attacks::Charisme => {
                             t3 = TextFragment::new("Charisme").color(Color::from_rgb(255, 200, 90));
                             t4 = TextFragment::new(" receiving ");
                             t5 = TextFragment::new("30").color(Color::from_rgb(30, 255, 80));
@@ -585,7 +606,7 @@ impl EventHandler for MyGame {
                             process_display.add(t4);
                             process_display.add(t5);
                         }
-                        Attacks::MotherSoul(_) => {
+                        Attacks::MotherSoul => {
                             t3 = TextFragment::new("Mother Soul")
                                 .color(Color::from_rgb(255, 200, 90));
                             t4 = TextFragment::new(" sworning on his mother soul");
@@ -651,7 +672,7 @@ impl EventHandler for MyGame {
                             process_display.add(t10);
                             process_display.add(t11);
                         }
-                        Attacks::Charisme(_) => {
+                        Attacks::Charisme => {
                             t9 = TextFragment::new("Charisme").color(Color::from_rgb(255, 200, 90));
                             t10 = TextFragment::new(" receiving ");
                             t11 = TextFragment::new("30").color(Color::from_rgb(30, 255, 80));
@@ -659,7 +680,7 @@ impl EventHandler for MyGame {
                             process_display.add(t10);
                             process_display.add(t11);
                         }
-                        Attacks::MotherSoul(_) => {
+                        Attacks::MotherSoul => {
                             t9 = TextFragment::new("Mother Soul")
                                 .color(Color::from_rgb(255, 200, 90));
                             t10 = TextFragment::new(" sworning on his mother soul");
@@ -742,11 +763,9 @@ fn main() -> GameResult {
         j2_attacks: Vec::new(),
         j1_selected_attacks: Attacks::None,
         j2_selected_attacks: Attacks::None,
-        sounds: Vec::new(),
+        sounds: HashMap::new(),
     };
-    // Run!
-    my_game.sounds.push(Attacks::Ora.sound(&mut context).unwrap());
-    my_game.sounds.push(Attacks::Muda.sound(&mut context).unwrap());
+    attack_sound_load(&mut my_game.sounds, &mut context);
     Ok(match run(&mut context, &mut event_loop, &mut my_game) {
         Ok(_) => println!("Exited cleanly."),
         Err(error) => println!("Error occured: {}", error),
