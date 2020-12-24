@@ -17,8 +17,10 @@ use ggez::{Context, ContextBuilder, GameResult};
 use na::*;
 use stand_data::*;
 
+
 pub struct MyGame {
     // Your state here...
+    theme_sound: Source,
     scene: u8,
     turn: u32,
     j1_data: StandInfo,
@@ -33,34 +35,37 @@ pub struct MyGame {
 }
 
 impl MyGame {
+    //TODO Racourcir ce code
     fn process(&mut self) {
+        self.theme_sound.set_volume(0.1);
         if faster_than(&self.j1_data, &self.j2_data) {
-            process_attack(
+            process_turn(
                 &mut self.j1_data,
                 &mut self.j2_data,
                 &mut self.j1_attacks,
                 &mut self.sounds,
             );
-            process_attack(
+            process_turn(
                 &mut self.j2_data,
                 &mut self.j1_data,
                 &mut self.j2_attacks,
                 &mut self.sounds,
             );
         } else {
-            process_attack(
+            process_turn(
                 &mut self.j2_data,
                 &mut self.j1_data,
                 &mut self.j2_attacks,
                 &mut self.sounds,
             );
-            process_attack(
+            process_turn(
                 &mut self.j1_data,
                 &mut self.j2_data,
                 &mut self.j1_attacks,
                 &mut self.sounds,
             );
         }
+        self.theme_sound.set_volume(1.0);
     }
 
     fn display_level_text(&self, context: &mut Context) -> GameResult<()> {
@@ -70,7 +75,7 @@ impl MyGame {
         // Display j1 selected attack
         let mut j1_attack;
         match self.j1_selected_attacks {
-            Attacks::Zawarudo => j1_attack = Text::new("J1 selected Zawarudo !"),
+            Attacks::Zawarudo(_) => j1_attack = Text::new("J1 selected Zawarudo !"),
             Attacks::Muda => j1_attack = Text::new("J1 selected Muda !"),
             Attacks::RoadRoller => j1_attack = Text::new("J1 selected Road Roller !"),
             Attacks::Charisme => j1_attack = Text::new("J1 selected Charisme !"),
@@ -90,7 +95,7 @@ impl MyGame {
         // Display j2 selected attack
         let mut j2_attack;
         match self.j2_selected_attacks {
-            Attacks::Zawarudo => j2_attack = Text::new("J2 selected Zawarudo !"),
+            Attacks::Zawarudo(_) => j2_attack = Text::new("J2 selected Zawarudo !"),
             Attacks::Muda => j2_attack = Text::new("J2 selected Muda  !"),
             Attacks::RoadRoller => j2_attack = Text::new("J2 selected Road Roller !"),
             Attacks::Charisme => j2_attack = Text::new("J2 selected Charisme !"),
@@ -124,7 +129,7 @@ impl MyGame {
 
         for attack in j1_attacks {
             match attack {
-                Attacks::Zawarudo => j1_attacks_text.push(Text::new("(R) Zawarudo")),
+                Attacks::Zawarudo(_) => j1_attacks_text.push(Text::new("(R) Zawarudo")),
                 Attacks::Muda => j1_attacks_text.push(Text::new("(A) Muda")),
                 Attacks::RoadRoller => j1_attacks_text.push(Text::new("(Z) Road Roller")),
                 Attacks::Charisme => j1_attacks_text.push(Text::new("(E) Charisme")),
@@ -164,7 +169,7 @@ impl MyGame {
 
         for attack in j2_attacks {
             match attack {
-                Attacks::Zawarudo => j2_attacks_text.push(Text::new("(R) Zawarudo")),
+                Attacks::Zawarudo(_) => j2_attacks_text.push(Text::new("(R) Zawarudo")),
                 Attacks::Muda => j2_attacks_text.push(Text::new("(A) Muda")),
                 Attacks::RoadRoller => j2_attacks_text.push(Text::new("(Z) Road Roller")),
                 Attacks::Charisme => j2_attacks_text.push(Text::new("(E) Charisme")),
@@ -296,33 +301,22 @@ impl MyGame {
     }
 
     fn match_attacks(&self, player_attack: &Attacks, process_display: &mut Text) {
-        let t2;
-        let t3;
-        let t4;
-        let t5;
+        let mut t2= TextFragment::new("with ");
+        let mut t3= TextFragment::new("");
+        let mut t4= TextFragment::new("");
+        let mut t5= TextFragment::new("");
         match player_attack {
-            Attacks::Zawarudo => {
-                t2 = TextFragment::new("with ");
+            Attacks::Zawarudo(_) => {
                 t3 = TextFragment::new("Zawarudo ").color(Color::from_rgb(255, 200, 90));
                 t4 = TextFragment::new("dealing ");
                 t5 = TextFragment::new("0").color(Color::from_rgb(30, 255, 80));
-                process_display.add(t2);
-                process_display.add(t3);
-                process_display.add(t4);
-                process_display.add(t5);
             }
             Attacks::Muda => {
-                t2 = TextFragment::new("with ");
                 t3 = TextFragment::new("Muda ").color(Color::from_rgb(255, 200, 90));
                 t4 = TextFragment::new("dealing ");
                 t5 = TextFragment::new("a lot of damage").color(Color::from_rgb(30, 255, 80));
-                process_display.add(t2);
-                process_display.add(t3);
-                process_display.add(t4);
-                process_display.add(t5);
             }
             Attacks::RoadRoller => {
-                t2 = TextFragment::new("with ");
                 t3 = TextFragment::new("Road Roller ").color(Color::from_rgb(255, 200, 90));
                 t4 = TextFragment::new("dealing ");
                 t5 = TextFragment::new(format!(
@@ -330,39 +324,23 @@ impl MyGame {
                     (self.j1_data.strength * 4).to_string()
                 ))
                 .color(Color::from_rgb(30, 255, 80));
-                process_display.add(t2);
-                process_display.add(t3);
-                process_display.add(t4);
-                process_display.add(t5);
             }
             Attacks::Charisme => {
-                t2 = TextFragment::new("with ");
                 t3 = TextFragment::new("Charisme ").color(Color::from_rgb(255, 200, 90));
                 t4 = TextFragment::new("receiving ");
                 t5 = TextFragment::new("30 hp").color(Color::from_rgb(30, 255, 80));
-                process_display.add(t2);
-                process_display.add(t3);
-                process_display.add(t4);
-                process_display.add(t5);
             }
             Attacks::MotherSoul => {
+                t2 = TextFragment::new("");
                 t3 = TextFragment::new("sworning on his ");
                 t4 = TextFragment::new("Mother's soul").color(Color::from_rgb(255, 200, 90));
-                process_display.add(t3);
-                process_display.add(t4);
             }
             Attacks::Ora => {
-                t2 = TextFragment::new("with ");
                 t3 = TextFragment::new("Ora ").color(Color::from_rgb(255, 200, 90));
                 t4 = TextFragment::new("dealing ");
                 t5 = TextFragment::new("a lot of damage").color(Color::from_rgb(30, 255, 80));
-                process_display.add(t2);
-                process_display.add(t3);
-                process_display.add(t4);
-                process_display.add(t5);
             }
             Attacks::Facture => {
-                t2 = TextFragment::new("with ");
                 t3 = TextFragment::new("Facture ").color(Color::from_rgb(255, 200, 90));
                 t4 = TextFragment::new("dealing ");
                 t5 = TextFragment::new(format!(
@@ -370,19 +348,21 @@ impl MyGame {
                     (self.j1_data.strength * 4).to_string()
                 ))
                 .color(Color::from_rgb(30, 255, 80));
-                process_display.add(t2);
-                process_display.add(t3);
-                process_display.add(t4);
-                process_display.add(t5);
             }
             Attacks::None => (),
         }
+        process_display.add(t2);
+        process_display.add(t3);
+        process_display.add(t4);
+        process_display.add(t5);
     }
 }
 
 impl EventHandler for MyGame {
     fn update(&mut self, _context: &mut Context) -> GameResult<()> {
-        // Update code here...
+       if !self.theme_sound.playing(){
+           self.theme_sound.play()?;
+       }
         Ok(())
     }
 
@@ -577,11 +557,11 @@ fn main() -> GameResult {
         Ok(ctxbuilder) => ctxbuilder,
         Err(error) => panic!("Couldn't create ggez context : {}", error),
     };
-
     // Create an instance of your event handler.
     // Usually, you should provide it with the Context object to
     // use when setting your game up.
     let mut my_game = MyGame {
+        theme_sound:Source::new(&mut context,"/sound/GameTheme_sound.mp3").unwrap(),
         scene: 0,
         turn: 0,
         j1_data: StandInfo::dio(),

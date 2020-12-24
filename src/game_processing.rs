@@ -2,14 +2,30 @@ use crate::stand_data::*;
 use ggez::audio::*;
 use ggez::event::KeyCode;
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::process;
 // Ajout de string pour récup le nom de l'attaque pr le display
-pub fn process_attack(
+
+pub fn process_turn(
     j1: &mut StandInfo,
     j2: &mut StandInfo,
     attack_to_process: &mut Vec<Attacks>,
     sounds: &mut HashMap<Attacks, Source>,
 ) {
+    j1.reset_stand_info();
+    let done_effect = j1.status.to_vec();
+    let done_effect = done_effect.into_iter().collect::<HashSet<_>>();
+    for effect in done_effect.iter() {
+        effect_func(j1, &effect,attack_to_process);
+        let remov_pos = j1.status.iter().position(|t| effect == t);
+        match remov_pos {
+            Some(x) => {
+                j1.status.remove(x);
+            }
+            _ => (),
+        };
+    }
+
     for attack in attack_to_process.iter_mut() {
         match attack {
             Attacks::Facture => basic_attack(j1, j2, 4),
@@ -21,6 +37,7 @@ pub fn process_attack(
             _ => (),
         }
         let sound_to_play = sounds.get_mut(attack).unwrap();
+
         sound_to_play.play().unwrap();
         while sound_to_play.playing() {}
     }
