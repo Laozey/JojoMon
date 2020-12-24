@@ -14,7 +14,8 @@ use ggez::mint::Vector2;
 use ggez::nalgebra as na;
 use ggez::timer::fps;
 use ggez::{Context, ContextBuilder, GameResult};
-use na::*;
+use na::Point2;
+
 use stand_data::*;
 
 
