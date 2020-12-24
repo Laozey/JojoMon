@@ -9,8 +9,7 @@ use ggez::{GameResult, audio::*};
 use ggez::Context;
 use rand::Rng;
 use std::*;
-use ggez::nalgebra as na;
-use na::*;
+
 
 //TODO Ajouter Quelques Effet/Debuf ?
 //TODO Ajouter 4 autres Stand et leurs attaque
@@ -90,26 +89,6 @@ impl StandInfo {
         );
     }
 
-    pub fn display_player_pp(&self, context: &mut Context) -> GameResult<()> {
-        let mut image = Image::new(context, "/HEYimHeroic_3DS_FACE-024_Matt-Wii.png")?;
-        
-        match self.name.as_str() {
-            "Dio" => image = Image::new(context, "/Eoh_DIO.png")?,
-            "Jotaro" => image = Image::new(context, "/Jotaro_SC_Infobox_Manga.png")?,
-            _ => (),
-        }
-        
-        graphics::draw(
-            context,
-            &image,
-            DrawParam::default()
-                .dest(na::Point2::new(130.0, 100.0))
-                .scale(na::Vector2::new(0.5, 0.5)),
-        )?;
-
-        Ok(())
-
-    }
 }
 
 pub fn faster_than(stand1: &StandInfo, stand2: &StandInfo) -> bool {
