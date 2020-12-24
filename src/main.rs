@@ -18,7 +18,6 @@ use na::Point2;
 
 use stand_data::*;
 
-
 pub struct MyGame {
     // Your state here...
     theme_sound: Source,
@@ -302,10 +301,10 @@ impl MyGame {
     }
 
     fn match_attacks(&self, player_attack: &Attacks, process_display: &mut Text) {
-        let mut t2= TextFragment::new("with ");
-        let mut t3= TextFragment::new("");
-        let mut t4= TextFragment::new("");
-        let mut t5= TextFragment::new("");
+        let mut t2 = TextFragment::new("with ");
+        let mut t3 = TextFragment::new("");
+        let mut t4 = TextFragment::new("");
+        let mut t5 = TextFragment::new("");
         match player_attack {
             Attacks::Zawarudo(_) => {
                 t3 = TextFragment::new("Zawarudo ").color(Color::from_rgb(255, 200, 90));
@@ -361,9 +360,9 @@ impl MyGame {
 
 impl EventHandler for MyGame {
     fn update(&mut self, _context: &mut Context) -> GameResult<()> {
-       if !self.theme_sound.playing(){
-           self.theme_sound.play()?;
-       }
+        if !self.theme_sound.playing() {
+            self.theme_sound.play()?;
+        }
         Ok(())
     }
 
@@ -508,7 +507,7 @@ impl EventHandler for MyGame {
             draw(context, &line_mesh, DrawParam::default())?;
 
             self.display_level_text(context)?;
-        
+
             let mut imagej1 = Image::new(context, "/HEYimHeroic_3DS_FACE-024_Matt-Wii.png")?;
             match self.j1_data.name.as_str() {
                 "Dio" => imagej1 = Image::new(context, "/Eoh_DIO.png")?,
@@ -562,7 +561,7 @@ fn main() -> GameResult {
     // Usually, you should provide it with the Context object to
     // use when setting your game up.
     let mut my_game = MyGame {
-        theme_sound:Source::new(&mut context,"/sound/GameTheme_sound.mp3").unwrap(),
+        theme_sound: Source::new(&mut context, "/sound/GameTheme_sound.mp3").unwrap(),
         scene: 0,
         turn: 0,
         j1_data: StandInfo::dio(),
