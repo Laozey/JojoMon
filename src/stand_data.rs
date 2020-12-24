@@ -4,11 +4,13 @@
 #![allow(unused_mut)]
 
 use collections::HashMap;
-use ggez::audio::*;
+use ggez::{GameResult, audio::*};
 use ggez::Context;
-use ggez::{graphics::TextFragment, GameError};
+use ggez::{graphics::{self, TextFragment, Image, DrawParam}, GameError};
 use rand::Rng;
 use std::*;
+use ggez::nalgebra as na;
+use na::*;
 
 #[derive(Debug)]
 pub struct StandInfo {
@@ -73,6 +75,27 @@ impl StandInfo {
             Attacks::MotherSoul,
             Attacks::Zawarudo,
         );
+    }
+
+    pub fn display_player_pp(&self, context: &mut Context) -> GameResult<()> {
+        let mut image = Image::new(context, "/HEYimHeroic_3DS_FACE-024_Matt-Wii.png")?;
+        
+        match self.name.as_str() {
+            "Dio" => image = Image::new(context, "/Eoh_DIO.png")?,
+            "Jotaro" => image = Image::new(context, "/Jotaro_SC_Infobox_Manga.png")?,
+            _ => (),
+        }
+        
+        graphics::draw(
+            context,
+            &image,
+            DrawParam::default()
+                .dest(na::Point2::new(130.0, 100.0))
+                .scale(na::Vector2::new(0.5, 0.5)),
+        )?;
+
+        Ok(())
+
     }
 }
 
