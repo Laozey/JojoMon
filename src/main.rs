@@ -414,8 +414,11 @@ impl EventHandler for MyGame {
             clear(context, Color::from_rgb(120, 120, 120));
             self.display_menu(context)?;
         } else if self.scene == 1 {
-            clear(context, Color::from_rgb(120, 120, 120));
+            clear(context, Color::from_rgb(1, 14, 20));
             // Draw code here...
+            let background = Image::new(context, "/ac4a0ea3d1691ee48f7b7680e829dd5d.png")?;
+            draw(context, &background, DrawParam::default())?;
+
             let mut attack_meshes: Vec<Mesh> = Vec::new();
 
             // Button rect, color and offsets
@@ -504,6 +507,34 @@ impl EventHandler for MyGame {
             draw(context, &line_mesh, DrawParam::default())?;
 
             self.display_level_text(context)?;
+        
+            let mut imagej1 = Image::new(context, "/HEYimHeroic_3DS_FACE-024_Matt-Wii.png")?;
+            match self.j1_data.name.as_str() {
+                "Dio" => imagej1 = Image::new(context, "/Eoh_DIO.png")?,
+                "Jotaro" => imagej1 = Image::new(context, "/Jotaro_SC_Infobox_Manga.png")?,
+                _ => (),
+            }
+            draw(
+                context,
+                &imagej1,
+                DrawParam::default()
+                    .dest(na::Point2::new(40.0, 70.0))
+                    .scale(na::Vector2::new(0.5, 0.5)),
+            )?;
+
+            let mut imagej2 = Image::new(context, "/HEYimHeroic_3DS_FACE-024_Matt-Wii.png")?;
+            match self.j2_data.name.as_str() {
+                "Dio" => imagej2 = Image::new(context, "/Eoh_DIO.png")?,
+                "Jotaro" => imagej2 = Image::new(context, "/Jotaro_SC_Infobox_Manga.png")?,
+                _ => (),
+            }
+            draw(
+                context,
+                &imagej2,
+                DrawParam::default()
+                    .dest(na::Point2::new(600.0, 70.0))
+                    .scale(na::Vector2::new(0.5, 0.5)),
+            )?;
         }
 
         present(context)?;
