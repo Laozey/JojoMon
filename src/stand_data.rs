@@ -1,3 +1,4 @@
+//*Pour Ma Santé mentale*/
 #![allow(dead_code)]
 #![allow(unused_variables)]
 #![allow(unused_imports)]
@@ -6,10 +7,13 @@
 use collections::HashMap;
 use ggez::audio::*;
 use ggez::Context;
-use ggez::{graphics::TextFragment, GameError};
 use rand::Rng;
 use std::*;
 
+//TODO Ajouter Quelques Effet/Debuf ?
+//TODO Ajouter 4 autres Stand et leurs attaque
+
+//* Stats des Stands */
 #[derive(Debug)]
 pub struct StandInfo {
     pub name: String,
@@ -23,6 +27,7 @@ pub struct StandInfo {
     pub attack2: Attacks,
     pub attack3: Attacks,
     pub attack4: Attacks,
+    pub status: Vec<Status>,
 }
 impl StandInfo {
     pub fn new(
@@ -47,9 +52,16 @@ impl StandInfo {
             attack2,
             attack3,
             attack4,
+            status: Vec::new(),
         }
     }
+    pub fn reset_stand_info(&mut self){
+        self.speed = self.speed_max;
+        self.strength = self.strength_max;
+    }
 
+
+    //Un Personage
     pub fn dio() -> StandInfo {
         return StandInfo::new(
             "Dio".to_string(),
@@ -59,9 +71,10 @@ impl StandInfo {
             Attacks::Muda,
             Attacks::RoadRoller,
             Attacks::Charisme,
-            Attacks::Zawarudo,
+            Attacks::Zawarudo(1),
         );
     }
+    //Un Personage
     pub fn jotaro() -> StandInfo {
         return StandInfo::new(
             "Jotaro".to_string(),
@@ -71,7 +84,7 @@ impl StandInfo {
             Attacks::Ora,
             Attacks::Facture,
             Attacks::MotherSoul,
-            Attacks::Zawarudo,
+            Attacks::Zawarudo(2),
         );
     }
 }
@@ -83,10 +96,10 @@ pub fn faster_than(stand1: &StandInfo, stand2: &StandInfo) -> bool {
     return false;
 }
 
-// Ajout de string pour récup le nom de l'attaque pr le display
+//* Les Attaques disponible dans le jeu */
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Attacks {
-    Zawarudo,
+    Zawarudo(i32),
     Muda,
     RoadRoller,
     Charisme,
@@ -96,6 +109,7 @@ pub enum Attacks {
     None,
 }
 impl Attacks {
+    //* Les sons pour chaque attaque */
     pub fn sound(&self, context: &mut Context) -> Result<Source, String> {
         match self {
             Attacks::Muda => Ok(Source::new(context, "/sound/muda_sound_effect.mp3").unwrap()),
@@ -112,12 +126,16 @@ impl Attacks {
             Attacks::Facture => {
                 Ok(Source::new(context, "/sound/facture_sound_effect.ogg").unwrap())
             }
+            Attacks::Zawarudo(1) => Ok(Source::new(context, "/sound/Za_Warudo_Dio.mp3").unwrap()),
+            Attacks::Zawarudo(2) => {
+                Ok(Source::new(context, "/sound/Za_Warudo_Jotaro.mp3").unwrap())
+            }
 
             _ => return Err("Aucun audio".to_string()),
         }
     }
 }
-
+//*Permet de charger tout les sons dans le jeu */
 pub fn attack_sound_load(sounds: &mut HashMap<Attacks, Source>, context: &mut Context) {
     sounds.insert(Attacks::Ora, Attacks::Ora.sound(context).unwrap());
     sounds.insert(Attacks::Muda, Attacks::Muda.sound(context).unwrap());
@@ -131,8 +149,16 @@ pub fn attack_sound_load(sounds: &mut HashMap<Attacks, Source>, context: &mut Co
         Attacks::MotherSoul.sound(context).unwrap(),
     );
     sounds.insert(Attacks::Charisme, Attacks::Charisme.sound(context).unwrap());
+    sounds.insert(
+        Attacks::Zawarudo(1),
+        Attacks::Zawarudo(1).sound(context).unwrap(),
+    );
+    sounds.insert(
+        Attacks::Zawarudo(2),
+        Attacks::Zawarudo(2).sound(context).unwrap(),
+    );
 }
-
+//* Une simple attaque */
 pub fn basic_attack(attaquant: &mut StandInfo, receveur: &mut StandInfo, dmg: i32) {
     let total_dmg = attaquant.strength * dmg;
     receveur.hp -= total_dmg;
@@ -141,8 +167,8 @@ pub fn basic_attack(attaquant: &mut StandInfo, receveur: &mut StandInfo, dmg: i3
         attaquant.name, total_dmg, receveur.name
     );
 }
-
-pub fn basic_heal(attaquant: &mut StandInfo, receveur: &mut StandInfo, hp_recived: i32) {
+//* Un simple soin */
+pub fn basic_heal(attaquant: &mut StandInfo, _: &mut StandInfo, hp_recived: i32) {
     let healing = hp_recived * attaquant.strength;
     attaquant.hp += healing;
     println!("{} ce soigne de :{}", attaquant.name, healing);
@@ -152,13 +178,12 @@ pub fn basic_heal(attaquant: &mut StandInfo, receveur: &mut StandInfo, hp_recive
 }
 
 pub fn charisme(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
-    attaquant.hp += 30;
-    println!("{} ce soigne de :30", attaquant.name);
-    if attaquant.hp > attaquant.hp_max {
-        attaquant.hp = attaquant.hp_max;
+    basic_heal(attaquant, receveur, 3);
+    for i in 0..=4 {
+        attaquant.status.push(Status::Regeneration)
     }
 }
-
+//* Basic Attaque avec possibliter de critique */
 pub fn beat_up(attaquant: &mut StandInfo, receveur: &mut StandInfo, dmg: i32) {
     let mut rng = rand::thread_rng();
     if rng.gen_range(0, 10) <= 3 {
@@ -172,7 +197,7 @@ pub fn beat_up(attaquant: &mut StandInfo, receveur: &mut StandInfo, dmg: i32) {
         basic_attack(attaquant, receveur, dmg);
     }
 }
-
+//* Une Attaque Speciale */
 pub fn mother_soul(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
     let mut rng = rand::thread_rng();
     if rng.gen_range(0, 10) == 1 {
@@ -182,6 +207,31 @@ pub fn mother_soul(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
             attaquant.name, receveur.name
         );
     } else {
-        //TODO Retirer des stats
+        receveur.status.push(Status::SpeedLost);
+        receveur.status.push(Status::StrengthLost);
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+pub enum Status {
+    Regeneration,
+    DmgSec,
+    Etourdi,
+    SpeedLost,
+    StrengthLost,
+}
+
+pub fn effect_func(stand: &mut StandInfo, effect: &Status,attack_to_process: &mut Vec<Attacks>,) {
+    match effect {
+        Status::Regeneration => {
+            stand.hp += 10;
+            if stand.hp >= stand.hp_max {
+                stand.hp = stand.hp_max;
+            }
+        }
+        Status::DmgSec=> stand.hp -=10,
+        Status::Etourdi=> *attack_to_process = Vec::new(),
+        Status::SpeedLost=> stand.speed -= 10,
+        Status::StrengthLost=> stand.strength -= 3,
     }
 }
