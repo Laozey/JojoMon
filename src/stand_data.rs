@@ -13,7 +13,7 @@ use std::*;
 //TODO Ajouter Quelques Effet/Debuf ?
 //TODO Ajouter 4 autres Stand et leurs attaque
 
-//* Stats des Stands */
+///* Stats d'un Personnage
 #[derive(Debug)]
 pub struct StandInfo {
     pub name: String,
@@ -30,6 +30,7 @@ pub struct StandInfo {
     pub status: Vec<Status>,
 }
 impl StandInfo {
+    ///Permet de crée les stats d'un nouveau personage
     pub fn new(
         name: String,
         hp: i32,
@@ -55,6 +56,7 @@ impl StandInfo {
             status: Vec::new(),
         }
     }
+    ///Retire les debufs d'un stand
     pub fn reset_stand_info(&mut self) {
         self.speed = self.speed_max;
         self.strength = self.strength_max;
@@ -86,6 +88,7 @@ impl StandInfo {
             Attacks::Zawarudo(2),
         );
     }
+    //Un Personage
     pub fn kakyoin() -> StandInfo {
         return StandInfo::new(
             "Kakyoin".to_string(),
@@ -98,7 +101,7 @@ impl StandInfo {
             Attacks::None,
         );
     }
-
+    //Un Personage
     pub fn polnareff() -> StandInfo {
         return StandInfo::new(
             "Jean-Pierre-Polnareff".to_string(),
@@ -111,7 +114,7 @@ impl StandInfo {
             Attacks::None,
         );
     }
-
+    //Un Personage
     pub fn abdul() -> StandInfo {
         return StandInfo::new(
             "Mohamed Abdul".to_string(),
@@ -125,7 +128,7 @@ impl StandInfo {
         );
     }
 }
-
+///* Test si un stand est plus rapide qu'un autre
 pub fn faster_than(stand1: &StandInfo, stand2: &StandInfo) -> bool {
     if stand1.speed > stand2.speed {
         return true;
@@ -133,7 +136,7 @@ pub fn faster_than(stand1: &StandInfo, stand2: &StandInfo) -> bool {
     return false;
 }
 
-//* Les Attaques disponible dans le jeu */
+///* Les Attaques disponible dans le jeu
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Attacks {
     Zawarudo(i32),
@@ -159,7 +162,7 @@ pub enum Attacks {
     None,
 }
 impl Attacks {
-    //* Les sons pour chaque attaque */
+    ///*  Les sons pour chaque attaque
     pub fn sound(&self, context: &mut Context) -> Result<Source, String> {
         match self {
             Attacks::Muda => Ok(Source::new(context, "/sound/muda_sound_effect.mp3").unwrap()),
@@ -209,7 +212,7 @@ impl Attacks {
         }
     }
 }
-//*Permet de charger tout les sons dans le jeu */
+///* Permet de charger tout les sons dans le jeu
 pub fn attack_sound_load(sounds: &mut HashMap<Attacks, Source>, context: &mut Context) {
     sounds.insert(Attacks::Ora, Attacks::Ora.sound(context).unwrap());
     sounds.insert(Attacks::Muda, Attacks::Muda.sound(context).unwrap());
@@ -256,7 +259,7 @@ pub fn attack_sound_load(sounds: &mut HashMap<Attacks, Source>, context: &mut Co
         Attacks::MineField.sound(context).unwrap(),
     );
 }
-//* Une simple attaque */
+/// Une simple attaque
 pub fn basic_attack(attaquant: &mut StandInfo, receveur: &mut StandInfo, dmg: i32) {
     let total_dmg = attaquant.strength * dmg;
     receveur.hp -= total_dmg;
@@ -265,7 +268,7 @@ pub fn basic_attack(attaquant: &mut StandInfo, receveur: &mut StandInfo, dmg: i3
         attaquant.name, total_dmg, receveur.name
     );
 }
-//* Un simple soin */
+/// Un simple soin
 pub fn basic_heal(attaquant: &mut StandInfo, _: &mut StandInfo, hp_recived: i32) {
     let healing = hp_recived * attaquant.strength;
     attaquant.hp += healing;
@@ -274,14 +277,14 @@ pub fn basic_heal(attaquant: &mut StandInfo, _: &mut StandInfo, hp_recived: i32)
         attaquant.hp = attaquant.hp_max;
     }
 }
-
+/// Un soin + effet regeneration de 4 tour
 pub fn charisme(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
     basic_heal(attaquant, receveur, 3);
     for i in 0..=4 {
         attaquant.status.push(Status::Regeneration)
     }
 }
-//* Basic Attaque avec possibliter de critique */
+/// Basic Attaque avec possibliter de critique
 pub fn beat_up(attaquant: &mut StandInfo, receveur: &mut StandInfo, dmg: i32) {
     let mut rng = rand::thread_rng();
     if rng.gen_range(0, 10) <= 3 {
@@ -295,7 +298,7 @@ pub fn beat_up(attaquant: &mut StandInfo, receveur: &mut StandInfo, dmg: i32) {
         basic_attack(attaquant, receveur, dmg);
     }
 }
-//* Une Attaque Speciale */
+/// L'attaque spé de jotaro peut parfois oneshot ou debuff pour 1 tour
 pub fn mother_soul(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
     let mut rng = rand::thread_rng();
     if rng.gen_range(0, 10) == 1 {
@@ -310,48 +313,50 @@ pub fn mother_soul(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
     }
 }
 
+/// Le perso tire son epée et par consequent perd presque toute stat de degats pour 2 tour
 pub fn sword_shot(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
     basic_attack(attaquant, receveur, 15);
     attaquant.status.push(Status::StrengthNull);
     attaquant.status.push(Status::StrengthNull);
 }
-
+/// Le perso jete son "Armure" et gagne un buff de vitesse "eternel"
 pub fn armor_drop(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
     attaquant.hp -= 20;
     for i in 0..=80 {
         attaquant.status.push(Status::SpeedBuff);
     }
 }
-
+/// L'adversaire est ligoté est prend donc un debuff de vitesse
 pub fn ligotage(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
     receveur.status.push(Status::SpeedLost);
     receveur.status.push(Status::SpeedLost);
 }
-
+/// L'adversaire est piéger dans un champ de mine est subit des degats tout les tours
 pub fn mine_field(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
     receveur.status.push(Status::DmgSec);
     receveur.status.push(Status::DmgSec);
 }
 
+/// Une attaque basique avec application d'un debuf
 pub fn cross_fire(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
     basic_attack(attaquant, receveur, 2);
     receveur.status.push(Status::DmgSec);
 }
 
+/// Applique ligotage et un debuf sur l'adversaire
 pub fn red_bind(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
+    ligotage(attaquant, receveur);
     for i in 0..=4 {
         receveur.status.push(Status::DmgSec);
-        if i < 2 {
-            receveur.status.push(Status::SpeedLost);
-        }
     }
 }
 
+/// Bloque tout les mouvements de l'adversaire pour 2 tours
 pub fn zawarudo(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
     receveur.status.push(Status::Etourdi);
     receveur.status.push(Status::Etourdi);
 }
-
+/// Les Buff/Debuff possible
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Status {
     Regeneration,
@@ -364,6 +369,7 @@ pub enum Status {
     StrengthBuff,
 }
 
+/// Permet l'application des effet lors d'un tour de jeu
 pub fn effect_func(stand: &mut StandInfo, effect: &Status, attack_to_process: &mut Vec<Attacks>) {
     match effect {
         Status::Regeneration => {

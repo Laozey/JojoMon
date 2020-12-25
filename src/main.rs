@@ -139,7 +139,7 @@ impl MyGame {
                 Attacks::Ora => j1_attacks_text.push(Text::new("(A) Ora")),
                 Attacks::Facture => j1_attacks_text.push(Text::new("(Z) Facture")),
                 Attacks::None => j1_attacks_text.push(Text::new("")),
-                _=>(),
+                _ => (),
             }
         }
 
@@ -180,7 +180,7 @@ impl MyGame {
                 Attacks::Ora => j2_attacks_text.push(Text::new("(A) Ora")),
                 Attacks::Facture => j2_attacks_text.push(Text::new("(Z) Facture")),
                 Attacks::None => j2_attacks_text.push(Text::new("")),
-                _=>(),
+                _ => (),
             }
         }
         let mut i = 0;
@@ -354,7 +354,7 @@ impl MyGame {
                 .color(Color::from_rgb(30, 255, 80));
             }
             Attacks::None => (),
-            _=>(),
+            _ => (),
         }
         process_display.add(t2);
         process_display.add(t3);
