@@ -28,12 +28,24 @@ pub fn process_turn(
 
     for attack in attack_to_process.iter_mut() {
         match attack {
+            Attacks::Zawarudo(_) => zawarudo(j1,j2),
+
             Attacks::Facture => basic_attack(j1, j2, 4),
             Attacks::Ora => beat_up(j1, j2, 2),
             Attacks::Muda => beat_up(j1, j2, 2),
             Attacks::RoadRoller => basic_attack(j1, j2, 4),
             Attacks::Charisme => charisme(j1, j2),
             Attacks::MotherSoul => mother_soul(j1, j2),
+            Attacks::CrossFire => cross_fire(j1, j2),
+            Attacks::RedBind => red_bind(j1, j2),
+
+            Attacks::Rafale => beat_up(j1, j2, 4),
+            Attacks::SwordShot => sword_shot(j1, j2),
+            Attacks::ArmorDrop => armor_drop(j1, j2),
+
+            Attacks::EmeraldSplash => basic_attack(j1, j2,4),
+            Attacks::Ligotage => ligotage(j1, j2),
+            Attacks::MineField => mine_field(j1, j2),
             _ => (),
         }
         let sound_to_play = sounds.get_mut(attack).unwrap();

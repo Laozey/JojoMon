@@ -83,6 +83,7 @@ impl MyGame {
             Attacks::Ora => j1_attack = Text::new("J1 selected Ora !"),
             Attacks::Facture => j1_attack = Text::new("J1 selected Facture !"),
             Attacks::None => j1_attack = Text::new("Choose an attack !"),
+            _ => j1_attack = Text::new("Attack selected"),
         }
         j1_attack.set_font(hello_world_font, Scale::uniform(15.0));
 
@@ -103,6 +104,7 @@ impl MyGame {
             Attacks::Ora => j2_attack = Text::new("J2 selected Ora !"),
             Attacks::Facture => j2_attack = Text::new("J2 selected Facture !"),
             Attacks::None => j2_attack = Text::new("Choose an attack !"),
+            _ => j2_attack = Text::new("Attack selected"),
         }
         j2_attack.set_font(hello_world_font, Scale::uniform(15.0));
 
@@ -137,6 +139,7 @@ impl MyGame {
                 Attacks::Ora => j1_attacks_text.push(Text::new("(A) Ora")),
                 Attacks::Facture => j1_attacks_text.push(Text::new("(Z) Facture")),
                 Attacks::None => j1_attacks_text.push(Text::new("")),
+                _=>(),
             }
         }
 
@@ -177,6 +180,7 @@ impl MyGame {
                 Attacks::Ora => j2_attacks_text.push(Text::new("(A) Ora")),
                 Attacks::Facture => j2_attacks_text.push(Text::new("(Z) Facture")),
                 Attacks::None => j2_attacks_text.push(Text::new("")),
+                _=>(),
             }
         }
         let mut i = 0;
@@ -350,6 +354,7 @@ impl MyGame {
                 .color(Color::from_rgb(30, 255, 80));
             }
             Attacks::None => (),
+            _=>(),
         }
         process_display.add(t2);
         process_display.add(t3);
@@ -564,8 +569,8 @@ fn main() -> GameResult {
         theme_sound: Source::new(&mut context, "/sound/GameTheme_sound.mp3").unwrap(),
         scene: 0,
         turn: 0,
-        j1_data: StandInfo::dio(),
-        j2_data: StandInfo::jotaro(),
+        j1_data: StandInfo::polnareff(),
+        j2_data: StandInfo::dio(),
         j1_attacks: Vec::new(),
         j2_attacks: Vec::new(),
         j1_selected_attacks: Attacks::None,
