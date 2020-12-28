@@ -18,11 +18,11 @@ use std::*;
 #[derive(Debug)]
 pub struct StandInfo {
     pub name: String,
-    hp_max: i32,
+    pub hp_max: i32,
     pub hp: i32,
-    speed_max: i32,
+    pub speed_max: i32,
     pub speed: i32,
-    strength_max: i32,
+    pub strength_max: i32,
     pub strength: i32,
     pub attack1: Attacks,
     pub attack2: Attacks,
@@ -30,6 +30,7 @@ pub struct StandInfo {
     pub attack4: Attacks,
     pub status: Vec<Status>,
 }
+
 impl StandInfo {
     pub fn new(
         name: String,

@@ -18,11 +18,18 @@ use na::Point2;
 
 use stand_data::*;
 
+const PERSO_MAX: isize = 2;
+
 pub struct MyGame {
     // Your state here...
     theme_sound: Source,
     scene: u8,
     turn: u32,
+
+    select_iter: isize,
+    selected_character: String,
+    select_check: u8,
+
     j1_data: StandInfo,
     j1_attacks: Vec<Attacks>,
 
@@ -268,7 +275,11 @@ impl MyGame {
         )?;
 
         //Press Return to play...
-        let mut t1 = Text::new("Press");
+        let mut t1 = Text::new("Press ");
+        let t2 = TextFragment::new("Return ").color(Color::from_rgb(255, 200, 90));
+        t1.add(t2);
+        let t3 = TextFragment::new("to play...");
+        t1.add(t3);
         t1.set_font(Font::default(), Scale::uniform(20.0));
         queue_text(
             context,
@@ -277,26 +288,148 @@ impl MyGame {
             Some(Color::from_rgb(255, 255, 255)),
         );
 
-        let mut t2 = Text::new("Return");
-        t2.set_font(Font::default(), Scale::uniform(20.0));
+        draw_queued_text(context, DrawParam::default(), None, FilterMode::Linear)?;
+
+        Ok(())
+    }
+
+    fn display_character_selection(&mut self, context: &mut Context) -> GameResult {
+        // Vec de stand
+        let stands = vec![StandInfo::dio(), StandInfo::jotaro()];
+        // Set le character selectionné
+        let character = String::from(stands[self.select_iter as usize].name.as_str());
+        self.selected_character = character;
+        // - Display un text avec le nom du perso
+        let mut character_name = Text::new(stands[self.select_iter as usize].name.as_str());
+        character_name.set_font(Font::default(), Scale::uniform(20.0));
+        let character_name_pos = Point2::new(40.0, 50.0);
         queue_text(
             context,
-            &t2,
-            Point2::new(355.0, 550.0),
-            Some(Color::from_rgb(255, 200, 90)),
+            &character_name,
+            character_name_pos,
+            Some(Color::from_rgb(255, 0, 0)),
         );
 
-        let mut t3 = Text::new("to play...");
-        t3.set_font(Font::default(), Scale::uniform(20.0));
+        let mut stat_text = Text::new("Stats :\n\n");
+        let name = TextFragment::new("NAME : ");
+        let name_value = TextFragment::new(stands[self.select_iter as usize].name.as_str())
+            .color(Color::from_rgb(240, 136, 62));
+        stat_text.add(name);
+        stat_text.add(name_value);
+        let hp = TextFragment::new("\n\nHEALTH POINTS : ");
+        let hp_value = TextFragment::new(stands[self.select_iter as usize].hp_max.to_string())
+            .color(Color::from_rgb(63, 185, 80));
+        stat_text.add(hp);
+        stat_text.add(hp_value);
+        let speed = TextFragment::new("\n\nSPEED : ");
+        let speed_value =
+            TextFragment::new(stands[self.select_iter as usize].speed_max.to_string())
+                .color(Color::from_rgb(137, 84, 225));
+        stat_text.add(speed);
+        stat_text.add(speed_value);
+        let strength = TextFragment::new("\n\nSTRENGTH : ");
+        let strength_value =
+            TextFragment::new(stands[self.select_iter as usize].strength_max.to_string())
+                .color(Color::from_rgb(218, 54, 51));
+        stat_text.add(strength);
+        stat_text.add(strength_value);
+        stat_text.set_font(Font::default(), Scale::uniform(20.0));
+        let stat_text_pos = Point2::new(120.0, 40.0);
         queue_text(
             context,
-            &t3,
-            Point2::new(420.0, 550.0),
+            &stat_text,
+            stat_text_pos,
             Some(Color::from_rgb(255, 255, 255)),
         );
 
-        draw_queued_text(context, DrawParam::default(), None, FilterMode::Linear)?;
+        let mut j1_selection;
+        let mut j2_selection;
+        let mut go;
+        match self.select_check {
+            1 => {
+                j1_selection = Text::new(TextFragment::new(format!(
+                    "J1 select : {}",
+                    self.j1_data.name.as_str()
+                )));
+                j1_selection.set_font(Font::default(), Scale::uniform(20.0));
+                queue_text(
+                    context,
+                    &j1_selection,
+                    Point2::new(400.0, 40.0),
+                    Some(Color::from_rgb(30, 70, 255)),
+                );
+            }
+            2 => {
+                j2_selection = Text::new(TextFragment::new(format!(
+                    "J2 select : {}",
+                    self.j2_data.name.as_str()
+                )));
+                j2_selection.set_font(Font::default(), Scale::uniform(20.0));
+                queue_text(
+                    context,
+                    &j2_selection,
+                    Point2::new(400.0, 70.0),
+                    Some(Color::from_rgb(255, 30, 30)),
+                );
+                go = Text::new("\nGO !");
+                go.set_font(Font::default(), Scale::uniform(20.0));
+                queue_text(
+                    context,
+                    &go,
+                    Point2::new(400.0, 90.0),
+                    Some(Color::from_rgb(255, 255, 255)),
+                );
+            }
+            _ => (),
+        }
 
+        if self.select_check < 2 {
+            let mut help = Text::new("Press ");
+            let help_space = TextFragment::new("Space ").color(Color::from_rgb(255, 200, 90));
+            help.add(help_space);
+            let help_tail = TextFragment::new("to select a character...");
+            help.add(help_tail);
+            let help_text_pos = Point2::new(10.0, 570.0);
+            queue_text(
+                context,
+                &help,
+                help_text_pos,
+                Some(Color::from_rgb(255, 255, 255)),
+            );
+        } else {
+            let mut help = Text::new("Press ");
+            let help_space = TextFragment::new("Space ").color(Color::from_rgb(255, 200, 90));
+            help.add(help_space);
+            let help_tail = TextFragment::new("again to start...");
+            help.add(help_tail);
+            let help_text_pos = Point2::new(300.0, 570.0);
+            queue_text(
+                context,
+                &help,
+                help_text_pos,
+                Some(Color::from_rgb(255, 255, 255)),
+            );
+        }
+
+        // Draw rect to emphasize character_name text
+        let rect1 = Rect::new(
+            character_name_pos.x - 5.0,
+            character_name_pos.y - 5.0,
+            character_name.dimensions(context).0 as f32 + 10.0,
+            character_name.dimensions(context).1 as f32 + 10.0,
+        );
+        let rect1mesh = Mesh::new_rectangle(
+            context,
+            DrawMode::fill(),
+            rect1,
+            Color::from_rgb(255, 255, 255),
+        )?;
+        draw(context, &rect1mesh, DrawParam::default())?;
+
+        draw_queued_text(context, DrawParam::default(), None, FilterMode::Linear)?;
+        /* - Ces stats a coté
+        - Une box J1 / J2 avec le nom et/ou tête du perso lors de la selection (voir en fonction de faisabilité)
+        - prendre en compte select_check pour afficher les box*/
         Ok(())
     }
 
@@ -373,8 +506,48 @@ impl EventHandler for MyGame {
                 self.scene = 1
             }
         }
-        // Combat scene
         if self.scene == 1 {
+            // pressing up arrow inscrease iter / pressing down arrow decrease iter
+            match keycode {
+                KeyCode::Up => {
+                    if self.select_iter + 1 >= PERSO_MAX {
+                        self.select_iter = 0
+                    } else {
+                        self.select_iter += 1
+                    }
+                }
+                KeyCode::Down => {
+                    if self.select_iter - 1 < 0 {
+                        self.select_iter = PERSO_MAX - 1
+                    } else {
+                        self.select_iter -= 1
+                    }
+                }
+                KeyCode::Space => match self.select_check {
+                    0 => {
+                        self.j1_data = match self.selected_character.as_str() {
+                            "Dio" => StandInfo::dio(),
+                            "Jotaro" => StandInfo::jotaro(),
+                            _ => StandInfo::dio(), // Changer en Dummy
+                        };
+                        self.select_check = 1
+                    }
+                    1 => {
+                        self.j2_data = match self.selected_character.as_str() {
+                            "Dio" => StandInfo::dio(),
+                            "Jotaro" => StandInfo::jotaro(),
+                            _ => StandInfo::dio(), // Changer en Dummy
+                        };
+                        self.select_check = 2
+                    }
+                    2 => self.scene = 2,
+                    _ => (),
+                },
+                _ => (),
+            }
+        }
+        // Combat scene
+        if self.scene == 2 {
             if (self.turn % 2) == 0 {
                 // Player 1 turn ...
                 match keycode {
@@ -414,6 +587,9 @@ impl EventHandler for MyGame {
             clear(context, Color::from_rgb(120, 120, 120));
             self.display_menu(context)?;
         } else if self.scene == 1 {
+            clear(context, Color::from_rgb(1, 14, 20));
+            self.display_character_selection(context)?;
+        } else if self.scene == 2 {
             clear(context, Color::from_rgb(1, 14, 20));
             // Draw code here...
             let background = Image::new(context, "/ac4a0ea3d1691ee48f7b7680e829dd5d.png")?;
@@ -564,8 +740,11 @@ fn main() -> GameResult {
         theme_sound: Source::new(&mut context, "/sound/GameTheme_sound.mp3").unwrap(),
         scene: 0,
         turn: 0,
-        j1_data: StandInfo::dio(),
-        j2_data: StandInfo::jotaro(),
+        select_iter: 0,
+        selected_character: String::new(),
+        select_check: 0,
+        j1_data: StandInfo::dio(),    // Changer en dummy
+        j2_data: StandInfo::jotaro(), // Changer en dummy
         j1_attacks: Vec::new(),
         j2_attacks: Vec::new(),
         j1_selected_attacks: Attacks::None,
