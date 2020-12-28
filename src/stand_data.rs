@@ -5,16 +5,15 @@
 #![allow(unused_mut)]
 
 use collections::HashMap;
-use ggez::{GameResult, audio::*};
 use ggez::Context;
+use ggez::{audio::*, GameResult};
 use rand::Rng;
 use std::*;
-
 
 //TODO Ajouter Quelques Effet/Debuf ?
 //TODO Ajouter 4 autres Stand et leurs attaque
 
-//* Stats des Stands */
+///* Stats d'un Personnage
 #[derive(Debug)]
 pub struct StandInfo {
     pub name: String,
@@ -32,6 +31,7 @@ pub struct StandInfo {
 }
 
 impl StandInfo {
+    ///Permet de crée les stats d'un nouveau personage
     pub fn new(
         name: String,
         hp: i32,
@@ -57,11 +57,11 @@ impl StandInfo {
             status: Vec::new(),
         }
     }
-    pub fn reset_stand_info(&mut self){
+    ///Retire les debufs d'un stand
+    pub fn reset_stand_info(&mut self) {
         self.speed = self.speed_max;
         self.strength = self.strength_max;
     }
-
 
     //Un Personage
     pub fn dio() -> StandInfo {
@@ -89,9 +89,47 @@ impl StandInfo {
             Attacks::Zawarudo(2),
         );
     }
-
+    //Un Personage
+    pub fn kakyoin() -> StandInfo {
+        return StandInfo::new(
+            "Kakyoin".to_string(),
+            190,
+            10,
+            8,
+            Attacks::EmeraldSplash,
+            Attacks::Ligotage,
+            Attacks::MineField,
+            Attacks::None,
+        );
+    }
+    //Un Personage
+    pub fn polnareff() -> StandInfo {
+        return StandInfo::new(
+            "Jean-Pierre-Polnareff".to_string(),
+            180,
+            12,
+            7,
+            Attacks::Rafale,
+            Attacks::SwordShot,
+            Attacks::ArmorDrop,
+            Attacks::None,
+        );
+    }
+    //Un Personage
+    pub fn abdul() -> StandInfo {
+        return StandInfo::new(
+            "Mohamed Abdul".to_string(),
+            185,
+            11,
+            9,
+            Attacks::CrossFire,
+            Attacks::RedBind,
+            Attacks::FireBall,
+            Attacks::None,
+        );
+    }
 }
-
+///* Test si un stand est plus rapide qu'un autre
 pub fn faster_than(stand1: &StandInfo, stand2: &StandInfo) -> bool {
     if stand1.speed > stand2.speed {
         return true;
@@ -99,7 +137,7 @@ pub fn faster_than(stand1: &StandInfo, stand2: &StandInfo) -> bool {
     return false;
 }
 
-//* Les Attaques disponible dans le jeu */
+///* Les Attaques disponible dans le jeu
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Attacks {
     Zawarudo(i32),
@@ -109,10 +147,23 @@ pub enum Attacks {
     MotherSoul,
     Ora,
     Facture,
+
+    CrossFire,
+    RedBind,
+    FireBall,
+
+    Rafale,
+    SwordShot,
+    ArmorDrop,
+
+    EmeraldSplash,
+    Ligotage,
+    MineField,
+
     None,
 }
 impl Attacks {
-    //* Les sons pour chaque attaque */
+    ///*  Les sons pour chaque attaque
     pub fn sound(&self, context: &mut Context) -> Result<Source, String> {
         match self {
             Attacks::Muda => Ok(Source::new(context, "/sound/muda_sound_effect.mp3").unwrap()),
@@ -133,12 +184,36 @@ impl Attacks {
             Attacks::Zawarudo(2) => {
                 Ok(Source::new(context, "/sound/Za_Warudo_Jotaro.mp3").unwrap())
             }
-
+            Attacks::SwordShot => {
+                Ok(Source::new(context, "/sound/sword_shot_sound_effect.ogg").unwrap())
+            }
+            Attacks::Rafale => Ok(Source::new(context, "/sound/rafale_sound_effect.ogg").unwrap()),
+            Attacks::ArmorDrop => {
+                Ok(Source::new(context, "/sound/armor_drop_sound_effect.ogg").unwrap())
+            }
+            Attacks::CrossFire => {
+                Ok(Source::new(context, "/sound/cross_fire_sound_effect.mp3").unwrap())
+            }
+            Attacks::FireBall => {
+                Ok(Source::new(context, "/sound/Fire_Ball_sound_effect.ogg").unwrap())
+            }
+            Attacks::RedBind => {
+                Ok(Source::new(context, "/sound/red_bind_sound_effect.ogg").unwrap())
+            }
+            Attacks::MineField => {
+                Ok(Source::new(context, "/sound/Mine_field_sound_effect.ogg").unwrap())
+            }
+            Attacks::EmeraldSplash => {
+                Ok(Source::new(context, "/sound/emerald_splash_sound_effect.ogg").unwrap())
+            }
+            Attacks::Ligotage => {
+                Ok(Source::new(context, "/sound/ligotage_sound_effect.ogg").unwrap())
+            }
             _ => return Err("Aucun audio".to_string()),
         }
     }
 }
-//*Permet de charger tout les sons dans le jeu */
+///* Permet de charger tout les sons dans le jeu
 pub fn attack_sound_load(sounds: &mut HashMap<Attacks, Source>, context: &mut Context) {
     sounds.insert(Attacks::Ora, Attacks::Ora.sound(context).unwrap());
     sounds.insert(Attacks::Muda, Attacks::Muda.sound(context).unwrap());
@@ -160,8 +235,32 @@ pub fn attack_sound_load(sounds: &mut HashMap<Attacks, Source>, context: &mut Co
         Attacks::Zawarudo(2),
         Attacks::Zawarudo(2).sound(context).unwrap(),
     );
+    sounds.insert(Attacks::FireBall, Attacks::FireBall.sound(context).unwrap());
+    sounds.insert(
+        Attacks::CrossFire,
+        Attacks::CrossFire.sound(context).unwrap(),
+    );
+    sounds.insert(Attacks::RedBind, Attacks::RedBind.sound(context).unwrap());
+    sounds.insert(Attacks::Rafale, Attacks::Rafale.sound(context).unwrap());
+    sounds.insert(
+        Attacks::ArmorDrop,
+        Attacks::ArmorDrop.sound(context).unwrap(),
+    );
+    sounds.insert(
+        Attacks::SwordShot,
+        Attacks::SwordShot.sound(context).unwrap(),
+    );
+    sounds.insert(
+        Attacks::EmeraldSplash,
+        Attacks::EmeraldSplash.sound(context).unwrap(),
+    );
+    sounds.insert(Attacks::Ligotage, Attacks::Ligotage.sound(context).unwrap());
+    sounds.insert(
+        Attacks::MineField,
+        Attacks::MineField.sound(context).unwrap(),
+    );
 }
-//* Une simple attaque */
+/// Une simple attaque
 pub fn basic_attack(attaquant: &mut StandInfo, receveur: &mut StandInfo, dmg: i32) {
     let total_dmg = attaquant.strength * dmg;
     receveur.hp -= total_dmg;
@@ -170,7 +269,7 @@ pub fn basic_attack(attaquant: &mut StandInfo, receveur: &mut StandInfo, dmg: i3
         attaquant.name, total_dmg, receveur.name
     );
 }
-//* Un simple soin */
+/// Un simple soin
 pub fn basic_heal(attaquant: &mut StandInfo, _: &mut StandInfo, hp_recived: i32) {
     let healing = hp_recived * attaquant.strength;
     attaquant.hp += healing;
@@ -179,14 +278,14 @@ pub fn basic_heal(attaquant: &mut StandInfo, _: &mut StandInfo, hp_recived: i32)
         attaquant.hp = attaquant.hp_max;
     }
 }
-
+/// Un soin + effet regeneration de 4 tour
 pub fn charisme(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
     basic_heal(attaquant, receveur, 3);
     for i in 0..=4 {
         attaquant.status.push(Status::Regeneration)
     }
 }
-//* Basic Attaque avec possibliter de critique */
+/// Basic Attaque avec possibliter de critique
 pub fn beat_up(attaquant: &mut StandInfo, receveur: &mut StandInfo, dmg: i32) {
     let mut rng = rand::thread_rng();
     if rng.gen_range(0, 10) <= 3 {
@@ -200,7 +299,7 @@ pub fn beat_up(attaquant: &mut StandInfo, receveur: &mut StandInfo, dmg: i32) {
         basic_attack(attaquant, receveur, dmg);
     }
 }
-//* Une Attaque Speciale */
+/// L'attaque spé de jotaro peut parfois oneshot ou debuff pour 1 tour
 pub fn mother_soul(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
     let mut rng = rand::thread_rng();
     if rng.gen_range(0, 10) == 1 {
@@ -215,6 +314,50 @@ pub fn mother_soul(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
     }
 }
 
+/// Le perso tire son epée et par consequent perd presque toute stat de degats pour 2 tour
+pub fn sword_shot(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
+    basic_attack(attaquant, receveur, 15);
+    attaquant.status.push(Status::StrengthNull);
+    attaquant.status.push(Status::StrengthNull);
+}
+/// Le perso jete son "Armure" et gagne un buff de vitesse "eternel"
+pub fn armor_drop(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
+    attaquant.hp -= 20;
+    for i in 0..=80 {
+        attaquant.status.push(Status::SpeedBuff);
+    }
+}
+/// L'adversaire est ligoté est prend donc un debuff de vitesse
+pub fn ligotage(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
+    receveur.status.push(Status::SpeedLost);
+    receveur.status.push(Status::SpeedLost);
+}
+/// L'adversaire est piéger dans un champ de mine est subit des degats tout les tours
+pub fn mine_field(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
+    receveur.status.push(Status::DmgSec);
+    receveur.status.push(Status::DmgSec);
+}
+
+/// Une attaque basique avec application d'un debuf
+pub fn cross_fire(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
+    basic_attack(attaquant, receveur, 2);
+    receveur.status.push(Status::DmgSec);
+}
+
+/// Applique ligotage et un debuf sur l'adversaire
+pub fn red_bind(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
+    ligotage(attaquant, receveur);
+    for i in 0..=4 {
+        receveur.status.push(Status::DmgSec);
+    }
+}
+
+/// Bloque tout les mouvements de l'adversaire pour 2 tours
+pub fn zawarudo(attaquant: &mut StandInfo, receveur: &mut StandInfo) {
+    receveur.status.push(Status::Etourdi);
+    receveur.status.push(Status::Etourdi);
+}
+/// Les Buff/Debuff possible
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Status {
     Regeneration,
@@ -222,9 +365,13 @@ pub enum Status {
     Etourdi,
     SpeedLost,
     StrengthLost,
+    StrengthNull,
+    SpeedBuff,
+    StrengthBuff,
 }
 
-pub fn effect_func(stand: &mut StandInfo, effect: &Status,attack_to_process: &mut Vec<Attacks>,) {
+/// Permet l'application des effet lors d'un tour de jeu
+pub fn effect_func(stand: &mut StandInfo, effect: &Status, attack_to_process: &mut Vec<Attacks>) {
     match effect {
         Status::Regeneration => {
             stand.hp += 10;
@@ -232,9 +379,12 @@ pub fn effect_func(stand: &mut StandInfo, effect: &Status,attack_to_process: &mu
                 stand.hp = stand.hp_max;
             }
         }
-        Status::DmgSec=> stand.hp -=10,
-        Status::Etourdi=> *attack_to_process = Vec::new(),
-        Status::SpeedLost=> stand.speed -= 10,
-        Status::StrengthLost=> stand.strength -= 3,
+        Status::DmgSec => stand.hp -= 10,
+        Status::Etourdi => *attack_to_process = Vec::new(),
+        Status::SpeedLost => stand.speed -= 10,
+        Status::StrengthLost => stand.strength -= 3,
+        Status::SpeedBuff => stand.speed += 10,
+        Status::StrengthBuff => stand.strength += 5,
+        Status::StrengthNull => stand.strength = 3,
     }
 }
