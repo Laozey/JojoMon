@@ -39,6 +39,7 @@ pub fn process_turn(
             Attacks::MotherSoul => mother_soul(j1, j2),
             Attacks::CrossFire => cross_fire(j1, j2),
             Attacks::RedBind => red_bind(j1, j2),
+            Attacks::FireBall => basic_attack(j1, j2, 4),
 
             Attacks::Rafale => beat_up(j1, j2, 4),
             Attacks::SwordShot => sword_shot(j1, j2),
@@ -49,7 +50,7 @@ pub fn process_turn(
             Attacks::MineField => mine_field(j1, j2),
             _ => (),
         }
-        let sound_to_play = sounds.get_mut(attack).unwrap();
+        let sound_to_play = sounds.get_mut(attack).unwrap(); // Gérer None
 
         sound_to_play.play().unwrap();
         while sound_to_play.playing() {}
