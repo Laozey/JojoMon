@@ -1,7 +1,7 @@
 mod game_processing;
 mod stand_data;
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::{path::PathBuf, vec};
 
 use game_processing::*;
@@ -18,7 +18,7 @@ use na::Point2;
 
 use stand_data::*;
 
-const PERSO_MAX: isize = 2;
+const PERSO_MAX: isize = 5;
 
 pub struct MyGame {
     // Your state here...
@@ -77,7 +77,7 @@ impl MyGame {
 
     fn display_level_text(&self, context: &mut Context) -> GameResult<()> {
         // basic font
-        let hello_world_font = Font::default();
+        let normal_font = Font::default();
 
         // Display j1 selected attack
         let mut j1_attack;
@@ -89,10 +89,18 @@ impl MyGame {
             Attacks::MotherSoul => j1_attack = Text::new("J1 selected Mother Soul !"),
             Attacks::Ora => j1_attack = Text::new("J1 selected Ora !"),
             Attacks::Facture => j1_attack = Text::new("J1 selected Facture !"),
+            Attacks::EmeraldSplash => j1_attack = Text::new("J1 selected Emerald Splash !"),
+            Attacks::Ligotage => j1_attack = Text::new("J1 selected Ligotage !"),
+            Attacks::MineField => j1_attack = Text::new("J1 selected Mine Field !"),
+            Attacks::Rafale => j1_attack = Text::new("J1 selected Rafale !"),
+            Attacks::SwordShot => j1_attack = Text::new("J1 selected Sword Shot !"),
+            Attacks::ArmorDrop => j1_attack = Text::new("J1 selected Armor Drop !"),
+            Attacks::CrossFire => j1_attack = Text::new("J1 selected Cross Fire !"),
+            Attacks::RedBind => j1_attack = Text::new("J1 selected Red Bind !"),
+            Attacks::FireBall => j1_attack = Text::new("J1 selected Fire Ball !"),
             Attacks::None => j1_attack = Text::new("Choose an attack !"),
-            _ => j1_attack = Text::new("Attack selected"),
         }
-        j1_attack.set_font(hello_world_font, Scale::uniform(15.0));
+        j1_attack.set_font(normal_font, Scale::uniform(15.0));
 
         draw(
             context,
@@ -110,10 +118,18 @@ impl MyGame {
             Attacks::MotherSoul => j2_attack = Text::new("J2 selected Mother Soul !"),
             Attacks::Ora => j2_attack = Text::new("J2 selected Ora !"),
             Attacks::Facture => j2_attack = Text::new("J2 selected Facture !"),
+            Attacks::EmeraldSplash => j2_attack = Text::new("J2 selected Emerald Splash !"),
+            Attacks::Ligotage => j2_attack = Text::new("J2 selected Ligotage !"),
+            Attacks::MineField => j2_attack = Text::new("J2 selected Mine Field !"),
+            Attacks::Rafale => j2_attack = Text::new("J2 selected Rafale !"),
+            Attacks::SwordShot => j2_attack = Text::new("J2 selected Sword Shot !"),
+            Attacks::ArmorDrop => j2_attack = Text::new("J2 selected Armor Drop !"),
+            Attacks::CrossFire => j2_attack = Text::new("J2 selected Cross Fire !"),
+            Attacks::RedBind => j2_attack = Text::new("J2 selected Red Bind !"),
+            Attacks::FireBall => j2_attack = Text::new("J2 selected Fire Ball !"),
             Attacks::None => j2_attack = Text::new("Choose an attack !"),
-            _ => j2_attack = Text::new("Attack selected"),
         }
-        j2_attack.set_font(hello_world_font, Scale::uniform(15.0));
+        j2_attack.set_font(normal_font, Scale::uniform(15.0));
 
         draw(
             context,
@@ -138,22 +154,30 @@ impl MyGame {
 
         for attack in j1_attacks {
             match attack {
-                Attacks::Zawarudo(_) => j1_attacks_text.push(Text::new("(R) Zawarudo")),
-                Attacks::Muda => j1_attacks_text.push(Text::new("(A) Muda")),
-                Attacks::RoadRoller => j1_attacks_text.push(Text::new("(Z) Road Roller")),
-                Attacks::Charisme => j1_attacks_text.push(Text::new("(E) Charisme")),
-                Attacks::MotherSoul => j1_attacks_text.push(Text::new("(E) Mother Soul")),
-                Attacks::Ora => j1_attacks_text.push(Text::new("(A) Ora")),
-                Attacks::Facture => j1_attacks_text.push(Text::new("(Z) Facture")),
+                Attacks::Zawarudo(_) => j1_attacks_text.push(Text::new("(R)\nZawarudo")),
+                Attacks::Muda => j1_attacks_text.push(Text::new("(A)\nMuda")),
+                Attacks::RoadRoller => j1_attacks_text.push(Text::new("(Z)\nRoad Roller")),
+                Attacks::Charisme => j1_attacks_text.push(Text::new("(E)\nCharisme")),
+                Attacks::MotherSoul => j1_attacks_text.push(Text::new("(E)\nMother Soul")),
+                Attacks::Ora => j1_attacks_text.push(Text::new("(A)\nOra")),
+                Attacks::Facture => j1_attacks_text.push(Text::new("(Z)\nFacture")),
+                Attacks::EmeraldSplash => j1_attacks_text.push(Text::new("(A)\nEmerald Splash")),
+                Attacks::Ligotage => j1_attacks_text.push(Text::new("(Z)\nLigotage")),
+                Attacks::MineField => j1_attacks_text.push(Text::new("(E)\nMine Field")),
+                Attacks::Rafale => j1_attacks_text.push(Text::new("(A)\nRafale")),
+                Attacks::SwordShot => j1_attacks_text.push(Text::new("(Z)\nSword Shot")),
+                Attacks::ArmorDrop => j1_attacks_text.push(Text::new("(E)\nArmor Drop")),
+                Attacks::CrossFire => j1_attacks_text.push(Text::new("(A)\nCross Fire")),
+                Attacks::RedBind => j1_attacks_text.push(Text::new("(Z)\nRed Bind")),
+                Attacks::FireBall => j1_attacks_text.push(Text::new("(E)\nFire Ball")),
                 Attacks::None => j1_attacks_text.push(Text::new("")),
-                _ => (),
             }
         }
 
         let mut i = 0;
 
         for mut text in j1_attacks_text {
-            text.set_font(hello_world_font, Scale::uniform(12.0));
+            text.set_font(normal_font, Scale::uniform(12.0));
             draw(
                 context,
                 &text,
@@ -179,20 +203,28 @@ impl MyGame {
 
         for attack in j2_attacks {
             match attack {
-                Attacks::Zawarudo(_) => j2_attacks_text.push(Text::new("(R) Zawarudo")),
-                Attacks::Muda => j2_attacks_text.push(Text::new("(A) Muda")),
-                Attacks::RoadRoller => j2_attacks_text.push(Text::new("(Z) Road Roller")),
-                Attacks::Charisme => j2_attacks_text.push(Text::new("(E) Charisme")),
-                Attacks::MotherSoul => j2_attacks_text.push(Text::new("(E) Mother Soul")),
-                Attacks::Ora => j2_attacks_text.push(Text::new("(A) Ora")),
-                Attacks::Facture => j2_attacks_text.push(Text::new("(Z) Facture")),
+                Attacks::Zawarudo(_) => j2_attacks_text.push(Text::new("(R)\nZawarudo")),
+                Attacks::Muda => j2_attacks_text.push(Text::new("(A)\nMuda")),
+                Attacks::RoadRoller => j2_attacks_text.push(Text::new("(Z)\nRoad Roller")),
+                Attacks::Charisme => j2_attacks_text.push(Text::new("(E)\nCharisme")),
+                Attacks::MotherSoul => j2_attacks_text.push(Text::new("(E)\nMother Soul")),
+                Attacks::Ora => j2_attacks_text.push(Text::new("(A)\nOra")),
+                Attacks::Facture => j2_attacks_text.push(Text::new("(Z)\nFacture")),
+                Attacks::EmeraldSplash => j2_attacks_text.push(Text::new("(A)\nEmerald Splash")),
+                Attacks::Ligotage => j2_attacks_text.push(Text::new("(Z)\nLigotage")),
+                Attacks::MineField => j2_attacks_text.push(Text::new("(E)\nMine Field")),
+                Attacks::Rafale => j2_attacks_text.push(Text::new("(A)\nRafale")),
+                Attacks::SwordShot => j2_attacks_text.push(Text::new("(Z)\nSword Shot")),
+                Attacks::ArmorDrop => j2_attacks_text.push(Text::new("(E)\nArmor Drop")),
+                Attacks::CrossFire => j2_attacks_text.push(Text::new("(A)\nCross Fire")),
+                Attacks::RedBind => j2_attacks_text.push(Text::new("(Z)\nRed Bind")),
+                Attacks::FireBall => j2_attacks_text.push(Text::new("(E)\nFire Ball")),
                 Attacks::None => j2_attacks_text.push(Text::new("")),
-                _ => (),
             }
         }
         let mut i = 0;
         for mut text in j2_attacks_text {
-            text.set_font(hello_world_font, Scale::uniform(12.0));
+            text.set_font(normal_font, Scale::uniform(12.0));
             draw(
                 context,
                 &text,
@@ -202,9 +234,10 @@ impl MyGame {
         }
 
         // Display doc
-        let mut help =
-            Text::new("Try press A, Z, E or R...\nPress 'ctrl + key' to display tooltip");
-        help.set_font(hello_world_font, Scale::uniform(15.0));
+        let mut help = Text::new(
+            "Try press A, Z, E or R...\nPress 'ctrl + key' to display tooltip (not working yet)",
+        );
+        help.set_font(normal_font, Scale::uniform(15.0));
         draw(
             context,
             &help,
@@ -217,7 +250,7 @@ impl MyGame {
         } else {
             fps_text = Text::new(format!("Fps : {}", fps(context).round()).to_string());
         }
-        fps_text.set_font(hello_world_font, Scale::uniform(15.0));
+        fps_text.set_font(normal_font, Scale::uniform(15.0));
         draw(
             context,
             &fps_text,
@@ -229,7 +262,7 @@ impl MyGame {
             "turn {}",
             ((self.turn / 2) + 1).to_string()
         )));
-        turn.set_font(hello_world_font, Scale::uniform(30.0));
+        turn.set_font(normal_font, Scale::uniform(30.0));
         draw(
             context,
             &turn,
@@ -239,7 +272,7 @@ impl MyGame {
         let mut j1_hp = Text::new(String::from("J1 hp : "));
         let hp = TextFragment::new(self.j1_data.hp.to_string()).color(Color::from_rgb(255, 30, 30));
         j1_hp.add(hp);
-        j1_hp.set_font(hello_world_font, Scale::uniform(20.0));
+        j1_hp.set_font(normal_font, Scale::uniform(20.0));
         draw(
             context,
             &j1_hp,
@@ -249,13 +282,68 @@ impl MyGame {
         let mut j2_hp = Text::new(String::from("J2 hp : "));
         let hp = TextFragment::new(self.j2_data.hp.to_string()).color(Color::from_rgb(255, 30, 30));
         j2_hp.add(hp);
-        j2_hp.set_font(hello_world_font, Scale::uniform(20.0));
+        j2_hp.set_font(normal_font, Scale::uniform(20.0));
         draw(
             context,
             &j2_hp,
             DrawParam::default().dest(Point2::new(690.0, 315.0)),
         )?;
 
+        Ok(())
+    }
+
+    fn display_effects(&self, context: &mut Context, player: u8) -> GameResult {
+        let p;
+        let mut s = Text::new("");
+        let mut s1;
+        let s_pos;
+        if player == 1 {
+            p = &self.j1_data.status;
+            s_pos = Point2::new(20.0, 45.0);
+        } else {
+            p = &self.j2_data.status;
+            s_pos = Point2::new(500.0, 45.0);
+        }
+        let p = p.to_vec();
+        let vs = p.into_iter().collect::<HashSet<_>>();
+        for status in vs {
+            match status {
+                Status::Regeneration => {
+                    s1 = TextFragment::new("regeneration ").color(Color::from_rgb(30, 255, 80));
+                    s.add(s1);
+                }
+                Status::Etourdi => {
+                    s1 = TextFragment::new("étourdi ").color(Color::from_rgb(255, 200, 90));
+                    s.add(s1);
+                }
+                Status::SpeedLost => {
+                    s1 = TextFragment::new("speed ").color(Color::from_rgb(218, 54, 51));
+                    s.add(s1);
+                }
+                Status::StrengthLost => {
+                    s1 = TextFragment::new("strength ").color(Color::from_rgb(218, 54, 51));
+                    s.add(s1);
+                }
+                Status::SpeedBuff => {
+                    s1 = TextFragment::new("speed ").color(Color::from_rgb(30, 255, 80));
+                    s.add(s1);
+                }
+                Status::StrengthBuff => {
+                    s1 = TextFragment::new("strength ").color(Color::from_rgb(30, 255, 80));
+                    s.add(s1);
+                }
+                Status::StrengthNull => {
+                    s1 = TextFragment::new("strength ").color(Color::from_rgb(240, 136, 62));
+                    s.add(s1);
+                }
+                Status::DmgSec => {
+                    s1 = TextFragment::new("damage ").color(Color::from_rgb(218, 54, 51));
+                    s.add(s1);
+                }
+            }
+        }
+        queue_text(context, &s, s_pos, Some(Color::from_rgb(255, 255, 255)));
+        draw_queued_text(context, DrawParam::default(), None, FilterMode::Linear)?;
         Ok(())
     }
 
@@ -269,7 +357,7 @@ impl MyGame {
             Some(Color::from_rgb(255, 255, 255)),
         );
 
-        let image = Image::new(context, "/uxu4w1zqggn51.png")?;
+        let image = Image::new(context, "/Menu.png")?;
         draw(
             context,
             &image,
@@ -299,7 +387,13 @@ impl MyGame {
 
     fn display_character_selection(&mut self, context: &mut Context) -> GameResult {
         // Vec de stand
-        let stands = vec![StandInfo::dio(), StandInfo::jotaro()];
+        let stands = vec![
+            StandInfo::dio(),
+            StandInfo::jotaro(),
+            StandInfo::abdul(),
+            StandInfo::polnareff(),
+            StandInfo::kakyoin(),
+        ];
         // Set le character selectionné
         let character = String::from(stands[self.select_iter as usize].name.as_str());
         self.selected_character = character;
@@ -338,7 +432,7 @@ impl MyGame {
         stat_text.add(strength);
         stat_text.add(strength_value);
         stat_text.set_font(Font::default(), Scale::uniform(20.0));
-        let stat_text_pos = Point2::new(120.0, 40.0);
+        let stat_text_pos = Point2::new(300.0, 40.0);
         queue_text(
             context,
             &stat_text,
@@ -359,7 +453,7 @@ impl MyGame {
                 queue_text(
                     context,
                     &j1_selection,
-                    Point2::new(400.0, 40.0),
+                    Point2::new(100.0, 400.0),
                     Some(Color::from_rgb(30, 70, 255)),
                 );
             }
@@ -372,15 +466,15 @@ impl MyGame {
                 queue_text(
                     context,
                     &j2_selection,
-                    Point2::new(400.0, 70.0),
+                    Point2::new(300.0, 400.0),
                     Some(Color::from_rgb(255, 30, 30)),
                 );
-                go = Text::new("\nGO !");
+                go = Text::new("GO !");
                 go.set_font(Font::default(), Scale::uniform(20.0));
                 queue_text(
                     context,
                     &go,
-                    Point2::new(400.0, 90.0),
+                    Point2::new(700.0, 400.0),
                     Some(Color::from_rgb(255, 255, 255)),
                 );
             }
@@ -415,6 +509,16 @@ impl MyGame {
             );
         }
 
+        let mut inputs = Text::new("Up / Down arrows to select a character");
+        inputs.set_font(Font::default(), Scale::uniform(15.0));
+        let inputs_pos = Point2::new(10.0, 10.0);
+        queue_text(
+            context,
+            &inputs,
+            inputs_pos,
+            Some(Color::from_rgb(255, 255, 255)),
+        );
+
         // Draw rect to emphasize character_name text
         let rect1 = Rect::new(
             character_name_pos.x - 5.0,
@@ -431,41 +535,51 @@ impl MyGame {
         draw(context, &rect1mesh, DrawParam::default())?;
 
         draw_queued_text(context, DrawParam::default(), None, FilterMode::Linear)?;
-        /* - Ces stats a coté
-        - Une box J1 / J2 avec le nom et/ou tête du perso lors de la selection (voir en fonction de faisabilité)
-        - prendre en compte select_check pour afficher les box*/
         Ok(())
     }
 
-    fn match_attacks(&self, player_attack: &Attacks, process_display: &mut Text) {
+    fn match_attacks(&self, player_attack: &Attacks, process_display: &mut Text, player: u8) {
         let mut t2 = TextFragment::new("with ");
         let mut t3 = TextFragment::new("");
         let mut t4 = TextFragment::new("");
         let mut t5 = TextFragment::new("");
+        let mut t6 = TextFragment::new("");
+        let mut t7 = TextFragment::new("");
+        let mut s = &StandInfo::dio(); // Need dummy
+        match player {
+            1 => {
+                s = &self.j1_data;
+            }
+            2 => {
+                s = &self.j2_data;
+            }
+            _ => {
+                ();
+            }
+        }
         match player_attack {
             Attacks::Zawarudo(_) => {
                 t3 = TextFragment::new("Zawarudo ").color(Color::from_rgb(255, 200, 90));
-                t4 = TextFragment::new("dealing ");
-                t5 = TextFragment::new("0").color(Color::from_rgb(30, 255, 80));
+                t4 = TextFragment::new("stunning him");
+                t5 = TextFragment::new(" for 2 turn")
             }
             Attacks::Muda => {
                 t3 = TextFragment::new("Muda ").color(Color::from_rgb(255, 200, 90));
                 t4 = TextFragment::new("dealing ");
-                t5 = TextFragment::new("a lot of damage").color(Color::from_rgb(30, 255, 80));
+                t5 = TextFragment::new("a lot of damage").color(Color::from_rgb(218, 54, 51));
             }
             Attacks::RoadRoller => {
                 t3 = TextFragment::new("Road Roller ").color(Color::from_rgb(255, 200, 90));
                 t4 = TextFragment::new("dealing ");
-                t5 = TextFragment::new(format!(
-                    "{} damage",
-                    (self.j1_data.strength * 4).to_string()
-                ))
-                .color(Color::from_rgb(30, 255, 80));
+                t5 = TextFragment::new((s.strength * 4).to_string())
+                    .color(Color::from_rgb(218, 54, 51));
+                t6 = TextFragment::new(" damage");
             }
             Attacks::Charisme => {
                 t3 = TextFragment::new("Charisme ").color(Color::from_rgb(255, 200, 90));
                 t4 = TextFragment::new("receiving ");
-                t5 = TextFragment::new("30 hp").color(Color::from_rgb(30, 255, 80));
+                t5 = TextFragment::new("30 ").color(Color::from_rgb(30, 255, 80));
+                t6 = TextFragment::new("hp");
             }
             Attacks::MotherSoul => {
                 t2 = TextFragment::new("");
@@ -475,24 +589,85 @@ impl MyGame {
             Attacks::Ora => {
                 t3 = TextFragment::new("Ora ").color(Color::from_rgb(255, 200, 90));
                 t4 = TextFragment::new("dealing ");
-                t5 = TextFragment::new("a lot of damage").color(Color::from_rgb(30, 255, 80));
+                t5 = TextFragment::new("a lot of damage").color(Color::from_rgb(218, 54, 51));
             }
             Attacks::Facture => {
                 t3 = TextFragment::new("Facture ").color(Color::from_rgb(255, 200, 90));
                 t4 = TextFragment::new("dealing ");
-                t5 = TextFragment::new(format!(
-                    "{} damage",
-                    (self.j1_data.strength * 4).to_string()
-                ))
-                .color(Color::from_rgb(30, 255, 80));
+                t5 = TextFragment::new((s.strength * 4).to_string())
+                    .color(Color::from_rgb(218, 54, 51));
+                t6 = TextFragment::new(" damage");
+            }
+            Attacks::EmeraldSplash => {
+                t3 = TextFragment::new("Emerald Splash ").color(Color::from_rgb(255, 200, 90));
+                t4 = TextFragment::new("dealing ");
+                t5 = TextFragment::new((s.strength * 4).to_string())
+                    .color(Color::from_rgb(218, 54, 51));
+                t6 = TextFragment::new(" damage");
+            }
+            Attacks::Ligotage => {
+                t3 = TextFragment::new("Ligotage ").color(Color::from_rgb(255, 200, 90));
+                t4 = TextFragment::new("decreasing his ");
+                t5 = TextFragment::new("speed").color(Color::from_rgb(137, 84, 225));
+            }
+            Attacks::MineField => {
+                t3 = TextFragment::new("Mine Field ").color(Color::from_rgb(255, 200, 90));
+                t4 = TextFragment::new("dealing ");
+                t5 = TextFragment::new("10 ").color(Color::from_rgb(218, 54, 51));
+                t6 = TextFragment::new("damage each turn");
+            }
+            Attacks::Rafale => {
+                t3 = TextFragment::new("Rafale ").color(Color::from_rgb(255, 200, 90));
+                t4 = TextFragment::new("dealing ");
+                t5 = TextFragment::new((s.strength * 4).to_string())
+                    .color(Color::from_rgb(218, 54, 51));
+                t6 = TextFragment::new(" damage");
+            }
+            Attacks::SwordShot => {
+                t3 = TextFragment::new("Sword Shot ").color(Color::from_rgb(255, 200, 90));
+                t4 = TextFragment::new("dealing ");
+                t5 = TextFragment::new((s.strength * 15).to_string())
+                    .color(Color::from_rgb(218, 54, 51));
+                t6 = TextFragment::new(" damage but for 2 turns, he lost all his ");
+                t7 = TextFragment::new("strength").color(Color::from_rgb(218, 54, 51));
+            }
+            Attacks::ArmorDrop => {
+                t3 = TextFragment::new("Armor Drop ").color(Color::from_rgb(255, 200, 90));
+                t4 = TextFragment::new("lowering his health by ");
+                t5 = TextFragment::new("20").color(Color::from_rgb(218, 54, 51));
+                t6 = TextFragment::new(" but increasing his speed by ");
+                t7 = TextFragment::new("10").color(Color::from_rgb(137, 84, 225));
+            }
+            Attacks::CrossFire => {
+                t3 = TextFragment::new("Cross Fire ").color(Color::from_rgb(255, 200, 90));
+                t4 = TextFragment::new("dealing ");
+                t5 = TextFragment::new((s.strength * 2).to_string())
+                    .color(Color::from_rgb(218, 54, 51));
+                t6 = TextFragment::new(" and dealing damage over time by ");
+                t7 = TextFragment::new("10").color(Color::from_rgb(218, 54, 51));
+            }
+            Attacks::RedBind => {
+                t3 = TextFragment::new("Red Bind ").color(Color::from_rgb(255, 200, 90));
+                t4 = TextFragment::new("decreasing his");
+                t5 = TextFragment::new(" speed").color(Color::from_rgb(137, 84, 225));
+                t6 = TextFragment::new(" and dealing damage over time by ");
+                t7 = TextFragment::new("10").color(Color::from_rgb(218, 54, 51));
+            }
+            Attacks::FireBall => {
+                t3 = TextFragment::new("Red Bind ").color(Color::from_rgb(255, 200, 90));
+                t4 = TextFragment::new("dealing ");
+                t5 = TextFragment::new((s.strength * 4).to_string())
+                    .color(Color::from_rgb(218, 54, 51));
+                t6 = TextFragment::new(" damage");
             }
             Attacks::None => (),
-            _ => (),
         }
         process_display.add(t2);
         process_display.add(t3);
         process_display.add(t4);
         process_display.add(t5);
+        process_display.add(t6);
+        process_display.add(t7);
     }
 }
 
@@ -533,7 +708,10 @@ impl EventHandler for MyGame {
                         self.j1_data = match self.selected_character.as_str() {
                             "Dio" => StandInfo::dio(),
                             "Jotaro" => StandInfo::jotaro(),
-                            _ => StandInfo::dio(), // Changer en Dummy
+                            "Kakyoin" => StandInfo::kakyoin(),
+                            "Mohamed Abdul" => StandInfo::abdul(),
+                            "Jean-Pierre-Polnareff" => StandInfo::polnareff(),
+                            _ => StandInfo::dio(),
                         };
                         self.select_check = 1
                     }
@@ -541,7 +719,10 @@ impl EventHandler for MyGame {
                         self.j2_data = match self.selected_character.as_str() {
                             "Dio" => StandInfo::dio(),
                             "Jotaro" => StandInfo::jotaro(),
-                            _ => StandInfo::dio(), // Changer en Dummy
+                            "Kakyoin" => StandInfo::kakyoin(),
+                            "Mohamed Abdul" => StandInfo::abdul(),
+                            "Jean-Pierre-Polnareff" => StandInfo::polnareff(),
+                            _ => StandInfo::dio(),
                         };
                         self.select_check = 2
                     }
@@ -597,7 +778,7 @@ impl EventHandler for MyGame {
         } else if self.scene == 2 {
             clear(context, Color::from_rgb(1, 14, 20));
             // Draw code here...
-            let background = Image::new(context, "/ac4a0ea3d1691ee48f7b7680e829dd5d.png")?;
+            let background = Image::new(context, "/Background.png")?;
             draw(context, &background, DrawParam::default())?;
 
             let mut attack_meshes: Vec<Mesh> = Vec::new();
@@ -657,25 +838,37 @@ impl EventHandler for MyGame {
                 let t1 = TextFragment::new(self.j1_data.name.to_string())
                     .color(Color::from_rgb(30, 70, 255));
                 process_display.add(t1);
-                let t2 = TextFragment::new(" attack ");
-                process_display.add(t2);
-                self.match_attacks(&self.j1_selected_attacks, &mut process_display);
-                let t6 = TextFragment::new("... ");
+                if *&self.j1_data.status.iter().any(|x| x == &Status::Etourdi) {
+                    let t10 = TextFragment::new(" is stunned");
+                    process_display.add(t10);
+                } else {
+                    let t2 = TextFragment::new(" attack ");
+                    process_display.add(t2);
+                    self.match_attacks(&self.j1_selected_attacks, &mut process_display, 1);
+                }
+                let t6 = TextFragment::new("...\n");
                 process_display.add(t6);
                 let t7 = TextFragment::new(self.j2_data.name.to_string())
                     .color(Color::from_rgb(255, 30, 30));
                 process_display.add(t7);
-                let t8 = TextFragment::new(" retaliat ");
-                process_display.add(t8);
-                self.match_attacks(&self.j2_selected_attacks, &mut process_display);
+                if *&self.j2_data.status.iter().any(|x| x == &Status::Etourdi) {
+                    let t10 = TextFragment::new(" is stunned");
+                    process_display.add(t10);
+                } else {
+                    let t2 = TextFragment::new(" attack ");
+                    process_display.add(t2);
+                    self.match_attacks(&self.j2_selected_attacks, &mut process_display, 2);
+                }
                 let t12 = TextFragment::new("!");
                 process_display.add(t12);
                 process_display.set_font(Font::default(), Scale::uniform(13.0));
                 draw(
                     context,
                     &process_display,
-                    DrawParam::default().dest(na::Point2::new(20.0, 280.0)),
+                    DrawParam::default().dest(na::Point2::new(20.0, 270.0)),
                 )?;
+                self.display_effects(context, 1)?;
+                self.display_effects(context, 2)?;
             }
 
             let line_mesh = MeshBuilder::new()
@@ -689,10 +882,13 @@ impl EventHandler for MyGame {
 
             self.display_level_text(context)?;
 
-            let mut imagej1 = Image::new(context, "/HEYimHeroic_3DS_FACE-024_Matt-Wii.png")?;
+            let mut imagej1 = Image::new(context, "/Matt.png")?;
             match self.j1_data.name.as_str() {
-                "Dio" => imagej1 = Image::new(context, "/Eoh_DIO.png")?,
-                "Jotaro" => imagej1 = Image::new(context, "/Jotaro_SC_Infobox_Manga.png")?,
+                "Dio" => imagej1 = Image::new(context, "/Dio.png")?,
+                "Jotaro" => imagej1 = Image::new(context, "/Jotaro.png")?,
+                "Kakyoin" => imagej1 = Image::new(context, "/Kakyoin.png")?,
+                "Mohamed Abdul" => imagej1 = Image::new(context, "/Abdul.png")?,
+                "Jean-Pierre-Polnareff" => imagej1 = Image::new(context, "/Polnareff.png")?,
                 _ => (),
             }
             draw(
@@ -703,10 +899,13 @@ impl EventHandler for MyGame {
                     .scale(na::Vector2::new(0.5, 0.5)),
             )?;
 
-            let mut imagej2 = Image::new(context, "/HEYimHeroic_3DS_FACE-024_Matt-Wii.png")?;
+            let mut imagej2 = Image::new(context, "/Matt.png")?;
             match self.j2_data.name.as_str() {
-                "Dio" => imagej2 = Image::new(context, "/Eoh_DIO.png")?,
-                "Jotaro" => imagej2 = Image::new(context, "/Jotaro_SC_Infobox_Manga.png")?,
+                "Dio" => imagej2 = Image::new(context, "/Dio.png")?,
+                "Jotaro" => imagej2 = Image::new(context, "/Jotaro.png")?,
+                "Kakyoin" => imagej2 = Image::new(context, "/Kakyoin.png")?,
+                "Mohamed Abdul" => imagej2 = Image::new(context, "/Abdul.png")?,
+                "Jean-Pierre-Polnareff" => imagej2 = Image::new(context, "/Polnareff.png")?,
                 _ => (),
             }
             draw(
@@ -748,8 +947,8 @@ fn main() -> GameResult {
         select_iter: 0,
         selected_character: String::new(),
         select_check: 0,
-        j1_data: StandInfo::dio(),    // Changer en dummy
-        j2_data: StandInfo::jotaro(), // Changer en dummy
+        j1_data: StandInfo::dio(),
+        j2_data: StandInfo::jotaro(),
         j1_attacks: Vec::new(),
         j2_attacks: Vec::new(),
         j1_selected_attacks: Attacks::None,

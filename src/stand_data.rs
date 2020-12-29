@@ -94,7 +94,7 @@ impl StandInfo {
         return StandInfo::new(
             "Kakyoin".to_string(),
             190,
-            10,
+            11,
             8,
             Attacks::EmeraldSplash,
             Attacks::Ligotage,
