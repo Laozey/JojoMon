@@ -5,8 +5,8 @@ Jojomon est un jeu basé uniquement sur la **phase de combat** de **Pokemon** av
 * Pour lancer le Jeu faire cargo run --release
 * Pour Obtenir la documentation du jeu cargo doc --open
 ### To do :
-- [ ]  Mécanique de combat
-- [ ]  IU fonctionnelle
+- [x]  Mécanique de combat
+- [x]  IU fonctionnelle
 
 ### Idée de fonctionnalités :
 * Tooltip sur les attaques
